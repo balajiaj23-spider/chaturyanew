@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <!-- Transparent Background -->
+  <g stroke="#b6ff00" stroke-width="18" fill="none" stroke-linecap="butt" stroke-linejoin="miter">
+    <!-- Left C Arc -->
+    <path d="M 60 18 A 32 32 0 1 0 60 82" />
+    <!-- Right Infinity Loop with slit gap -->
+    <path d="M 68 20 C 102 20, 118 80, 152 80 C 174 80, 186 68, 186 50 C 186 32, 174 20, 152 20 C 118 20, 102 80, 60 80" />
+  </g>
+</svg>
