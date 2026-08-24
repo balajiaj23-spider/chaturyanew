@@ -277,11 +277,42 @@ p {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  text-decoration: none;
 }
 
-.nav-brand img {
-  height: 42px;
+.brand-mark {
+  height: 44px;
   width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(182, 255, 0, 0.25));
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+  transition: color var(--transition-fast);
+}
+
+.brand-title .brand-accent {
+  color: var(--accent);
+  transition: color var(--transition-fast);
+}
+
+.brand-subtitle {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-top: 2px;
+  transition: color var(--transition-fast);
 }
 
 .nav-menu {
@@ -1063,6 +1094,18 @@ p {
 
 .address-link:hover {
   color: var(--accent);
+  text-decoration: underline;
+}
+
+.phone-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.phone-link:hover {
+  color: var(--accent-hover);
   text-decoration: underline;
 }
 
