@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Full Stack Development Workshop — Chathurya Student Developers Club</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ==================== STICKY NAVBAR ==================== -->
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html#home" class="nav-brand">
+        <img src="images/logo.svg" alt="Chathurya Student Developers Club Logo">
+      </a>
+
+      <nav class="nav-menu">
+        <a href="index.html#home" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About Us</a>
+        <a href="index.html#events" class="nav-link">Previous Events</a>
+        <a href="courses.html" class="nav-link">Courses</a>
+        <a href="fullstack.html" class="nav-link active">Full Stack</a>
+        <a href="data-analytics.html" class="nav-link">Data Analytics</a>
+        <a href="registration.html?course=fullstack" class="nav-link">Register</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">☀️</button>
+        <a href="registration.html?course=fullstack" class="btn btn-primary btn-sm">Register Now</a>
+        <button type="button" class="mobile-toggle" aria-label="Toggle mobile navigation menu" aria-expanded="false">☰</button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-nav-drawer">
+      <a href="index.html#home" class="nav-link">Home</a>
+      <a href="index.html#about" class="nav-link">About Us</a>
+      <a href="index.html#events" class="nav-link">Previous Events</a>
+      <a href="courses.html" class="nav-link">Courses</a>
+      <a href="fullstack.html" class="nav-link active">Full Stack</a>
+      <a href="data-analytics.html" class="nav-link">Data Analytics</a>
+      <a href="registration.html?course=fullstack" class="nav-link">Register</a>
+      <a href="registration.html?course=fullstack" class="btn btn-primary btn-block">Register Now</a>
+    </div>
+  </header>
+
+  <!-- ==================== WORKSHOP HERO ==================== -->
+  <section class="course-detail-hero">
+    <div class="container">
+      <div class="badge" style="margin-bottom: 1rem;">
+        <span class="badge-dot"></span>
+        Chathurya Technical Workshop
+      </div>
+      <h1>Full Stack <span class="text-accent">Development</span></h1>
+      <p style="max-width: 680px; margin-top: 0.75rem; font-size: 1.15rem; color: var(--text-secondary);">
+        Learn how modern websites and web applications are built from scratch. Master frontend UI layout, backend APIs, and database fundamentals with Chathurya Student Developers Club.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== WORKSHOP DETAILS MAIN ==================== -->
+  <section class="detail-section">
+    <div class="container">
+      <div class="detail-grid">
+        
+        <!-- Main Content Column -->
+        <div class="detail-main">
+          
+          <!-- Visual Banner Card -->
+          <div class="detail-card" style="padding: 0; overflow: hidden;">
+            <img src="images/fullstack.svg" alt="Full Stack Development Workshop Diagram" style="width: 100%; height: auto;">
+          </div>
+
+          <!-- About the Workshop -->
+          <div class="detail-card">
+            <h3>About The Workshop</h3>
+            <p style="margin-bottom: 1rem;">
+              The <strong>Full Stack Development Workshop</strong> is organized by <strong>Chathurya Student Developers Club</strong> for students who want to build real-world web applications. In this intensive 5-day hands-on program, you will transition from writing basic HTML elements to assembling complete, interactive, and responsive web platforms.
+            </p>
+            <p>
+              Under the guidance of senior developer mentors, you will write clean code, understand client-server communication, handle data persistence, and publish your final web project on GitHub.
+            </p>
+          </div>
+
+          <!-- What Students Will Learn -->
+          <div class="detail-card">
+            <h3>What Students Will Learn</h3>
+            
+            <div class="curriculum-grid">
+              
+              <!-- Module 1 -->
+              <div class="curriculum-box">
+                <h4>1. Frontend Development</h4>
+                <ul>
+                  <li>HTML5 Semantic Structure</li>
+                  <li>CSS3 Flexbox &amp; CSS Grid</li>
+                  <li>Responsive Mobile Layouts</li>
+                  <li>Vanilla JavaScript &amp; DOM Manipulation</li>
+                  <li>UI/UX Design Fundamentals</li>
+                </ul>
+              </div>
+
+              <!-- Module 2 -->
+              <div class="curriculum-box">
+                <h4>2. Backend Development</h4>
+                <ul>
+                  <li>Server-Side Architecture Concepts</li>
+                  <li>RESTful API Endpoints &amp; Routing</li>
+                  <li>Request/Response Lifecycle</li>
+                  <li>HTTP Methods (GET, POST, PUT, DELETE)</li>
+                  <li>Authentication &amp; Session Basics</li>
+                </ul>
+              </div>
+
+              <!-- Module 3 -->
+              <div class="curriculum-box">
+                <h4>3. Database Concepts</h4>
+                <ul>
+                  <li>Database Storage Fundamentals</li>
+                  <li>Tables, Schema &amp; Relationships</li>
+                  <li>CRUD Operations (Create, Read, Update, Delete)</li>
+                  <li>SQL &amp; Query Essentials</li>
+                </ul>
+              </div>
+
+              <!-- Module 4 -->
+              <div class="curriculum-box">
+                <h4>4. Development Tools</h4>
+                <ul>
+                  <li>VS Code Setup &amp; Extensions</li>
+                  <li>Git Version Control Workflows</li>
+                  <li>GitHub Repository Hosting</li>
+                  <li>Browser Developer Tools &amp; Debugging</li>
+                </ul>
+              </div>
+
+            </div>
+
+            <!-- Practical Learning Box -->
+            <div class="curriculum-box" style="margin-top: 1.5rem; background-color: var(--bg-card); border-color: var(--accent);">
+              <h4 style="color: var(--accent);">5. Practical Hands-On Learning</h4>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                Throughout the workshop, every concept is accompanied by guided coding labs, mini exercises, and a complete capstone web application project.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Sidebar Information Card -->
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Workshop Information</h3>
+
+            <div class="info-item">
+              <span class="info-label">Duration</span>
+              <span class="info-value">5 Days (Intensive Sessions)</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Who Can Attend</span>
+              <span class="info-value">Students from any stream interested in web development.</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Requirements &amp; Prerequisites</span>
+              <ul style="font-size: 0.9rem; color: var(--text-secondary); padding-left: 1rem; list-style: disc;">
+                <li>Basic computer knowledge</li>
+                <li>Laptop recommended</li>
+                <li>Enthusiasm to code and build</li>
+              </ul>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Certificate</span>
+              <span class="info-value" style="color: var(--accent);">Official Chathurya Certificate of Completion</span>
+            </div>
+
+            <a href="registration.html?course=fullstack" class="btn btn-primary btn-block" style="padding: 1rem; font-size: 1.05rem;">
+              Register Now →
+            </a>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== COMMON FOOTER ==================== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-brand">
+            <img src="images/logo.svg" alt="Chathurya Student Developers Club Logo">
+          </div>
+          <p>
+            Official Student Technical &amp; Developer Community dedicated to practical coding bootcamps, workshops, and student tech growth.
+          </p>
+          <div class="social-links">
+            <a href="https://linkedin.com" target="_blank" class="social-icon" aria-label="LinkedIn">in</a>
+            <a href="https://github.com" target="_blank" class="social-icon" aria-label="GitHub">gh</a>
+            <a href="https://instagram.com" target="_blank" class="social-icon" aria-label="Instagram">ig</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <div class="footer-links">
+            <a href="index.html#home">Home</a>
+            <a href="index.html#about">About Us</a>
+            <a href="index.html#events">Previous Events</a>
+            <a href="courses.html">Courses Catalog</a>
+            <a href="registration.html">Workshop Registration</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contact &amp; Club Info</h4>
+          <p><strong>Chathurya Student Developers Club</strong></p>
+          <p>Tech Campus Block B, College Campus, 560100</p>
+          <p>Email: <a href="mailto:chathurya.club@college.edu" style="color: var(--accent);">chathurya.club@college.edu</a></p>
+          <p>Phone: +91 98765 43210</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Chathurya Student Developers Club. All Rights Reserved.</p>
+        <p style="font-size: 0.8rem;">Conducted as part of the official student technical and learning activities of Chathurya Student Developers Club.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

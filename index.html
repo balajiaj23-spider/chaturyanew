@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chathurya Student Developers Club — Technical Workshop Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ==================== STICKY NAVBAR ==================== -->
+  <header class="navbar">
+    <div class="container">
+      <a href="#home" class="nav-brand">
+        <img src="images/logo.svg" alt="Chathurya Student Developers Club Logo">
+      </a>
+
+      <nav class="nav-menu">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About Us</a>
+        <a href="#events" class="nav-link">Previous Events</a>
+        <a href="#courses" class="nav-link">Courses</a>
+        <a href="#fullstack" class="nav-link">Full Stack</a>
+        <a href="#data-analytics" class="nav-link">Data Analytics</a>
+        <a href="#register" class="nav-link">Register</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">☀️</button>
+        <a href="#register" class="btn btn-primary btn-sm">Register Now</a>
+        <button type="button" class="mobile-toggle" aria-label="Toggle mobile navigation menu" aria-expanded="false">☰</button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer Menu -->
+    <div class="mobile-nav-drawer">
+      <a href="#home" class="nav-link active">Home</a>
+      <a href="#about" class="nav-link">About Us</a>
+      <a href="#events" class="nav-link">Previous Events</a>
+      <a href="#courses" class="nav-link">Courses</a>
+      <a href="#fullstack" class="nav-link">Full Stack</a>
+      <a href="#data-analytics" class="nav-link">Data Analytics</a>
+      <a href="#register" class="nav-link">Register</a>
+      <a href="#register" class="btn btn-primary btn-block">Register Now</a>
+    </div>
+  </header>
+
+  <!-- ==================== 1. HERO SECTION ==================== -->
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            Chathurya Student Developers Club 2026
+          </div>
+          <h1>Learn. Build. <span class="text-accent">Launch.</span></h1>
+          <p class="hero-subtitle">
+            Welcome to <strong>Chathurya Student Developers Club</strong>. Join our hands-on technical workshops designed to help students build practical skills, explore modern software technologies, and launch real-world projects.
+          </p>
+          <div class="hero-cta">
+            <a href="#courses" class="btn btn-primary">Explore Courses ↓</a>
+            <a href="#register" class="btn btn-secondary">Register Now</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <img src="images/hero-workshop.svg" alt="Chathurya Technical Workshop Coding Visual">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. ABOUT US SECTION ==================== -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <div class="badge" style="margin-bottom: 1rem;">
+            <span class="badge-dot"></span>
+            About Our Club
+          </div>
+          <h2>Chathurya Student Developers Club</h2>
+          <p>
+            <strong>Chathurya Student Developers Club</strong> is a premier student-led technical community dedicated to nurturing coding talent, practical software engineering, and data science skills.
+          </p>
+          <p>
+            We organize intensive hands-on workshops, hackathons, coding bootcamps, and data analytics labs led by experienced mentors and tech enthusiasts to help students excel in industry careers.
+          </p>
+          <a href="#courses" class="btn btn-secondary" style="margin-top: 0.5rem;">View Workshop Offerings</a>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Active Student Members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">20+</div>
+            <div class="stat-label">Events &amp; Bootcamps</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">Technical Workshops</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">95%</div>
+            <div class="stat-label">Project Completion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 3. PREVIOUS EVENTS SECTION ==================== -->
+  <section id="events" class="events-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Our Track Record
+        </div>
+        <h2>Previous Technical Events</h2>
+        <p>Explore recent workshops and practical bootcamps organized by Chathurya Student Developers Club.</p>
+      </div>
+
+      <div class="events-grid">
+        <!-- Event Card 1 -->
+        <article class="event-card">
+          <div class="event-img-wrapper">
+            <img src="images/event-1.svg" alt="Web Development Bootcamp Event">
+            <span class="event-date-badge">Feb 2026</span>
+          </div>
+          <div class="event-body">
+            <h3>Web Development Bootcamp</h3>
+            <p>A comprehensive 3-day bootcamp covering modern HTML5, CSS Grid, Flexbox, and JavaScript interactive web applications.</p>
+          </div>
+        </article>
+
+        <!-- Event Card 2 -->
+        <article class="event-card">
+          <div class="event-img-wrapper">
+            <img src="images/event-2.svg" alt="Python for Beginners Workshop">
+            <span class="event-date-badge">Jan 2026</span>
+          </div>
+          <div class="event-body">
+            <h3>Python for Beginners</h3>
+            <p>Hands-on lab introducing programming fundamentals, data structures, automation scripts, and algorithmic problem-solving.</p>
+          </div>
+        </article>
+
+        <!-- Event Card 3 -->
+        <article class="event-card">
+          <div class="event-img-wrapper">
+            <img src="images/event-3.svg" alt="Data Visualization Workshop">
+            <span class="event-date-badge">Dec 2025</span>
+          </div>
+          <div class="event-body">
+            <h3>Data Visualization Workshop</h3>
+            <p>Practical session on transforming raw datasets into insightful graphical dashboards using Matplotlib &amp; Pandas.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. COURSES CATALOG OVERVIEW SECTION ==================== -->
+  <section id="courses" class="courses-preview-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Structured Learning Paths
+        </div>
+        <h2>Choose Your Workshop Path</h2>
+        <p>Explore our 5-day structured hands-on workshops offered by Chathurya Student Developers Club.</p>
+      </div>
+
+      <div class="courses-grid">
+        <!-- Preview Card 1: Full Stack -->
+        <div class="course-card">
+          <div class="course-banner">
+            <img src="images/fullstack.svg" alt="Full Stack Development Workshop">
+          </div>
+          <div class="course-content">
+            <div class="badge" style="margin-bottom: 0.25rem;">5-Day Intensive</div>
+            <h3>Full Stack Development</h3>
+            <p>Master end-to-end web application development. Build responsive interfaces, REST APIs, and database integrations.</p>
+            <div class="tech-tags">
+              <span class="tech-tag">HTML5</span>
+              <span class="tech-tag">CSS3</span>
+              <span class="tech-tag">JavaScript</span>
+              <span class="tech-tag">Backend</span>
+              <span class="tech-tag">SQL</span>
+              <span class="tech-tag">Git</span>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+              <a href="#fullstack" class="btn btn-secondary btn-block">View Details ↓</a>
+              <a href="#register" onclick="selectCourseInForm('Full Stack Development')" class="btn btn-primary">Register</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Card 2: Data Analytics -->
+        <div class="course-card">
+          <div class="course-banner">
+            <img src="images/data-analytics.svg" alt="Data Analytics Workshop">
+          </div>
+          <div class="course-content">
+            <div class="badge" style="margin-bottom: 0.25rem;">5-Day Intensive</div>
+            <h3>Data Analytics</h3>
+            <p>Master Python data manipulation, dataset cleaning, exploratory data analysis, and graphical dashboard visualizations.</p>
+            <div class="tech-tags">
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">Pandas</span>
+              <span class="tech-tag">NumPy</span>
+              <span class="tech-tag">Cleaning</span>
+              <span class="tech-tag">Charts</span>
+              <span class="tech-tag">EDA</span>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+              <a href="#data-analytics" class="btn btn-secondary btn-block">View Details ↓</a>
+              <a href="#register" onclick="selectCourseInForm('Data Analytics')" class="btn btn-primary">Register</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 5. FULL STACK DEVELOPMENT SECTION ==================== -->
+  <section id="fullstack" class="detail-section" style="border-top: 1px solid var(--border-subtle); padding-top: 5rem;">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Detailed Workshop Syllabus
+        </div>
+        <h2>Full Stack <span class="text-accent">Development</span></h2>
+        <p>Learn how modern websites and web applications are designed, coded, and deployed from scratch.</p>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-main">
+          <div class="detail-card" style="padding: 0; overflow: hidden;">
+            <img src="images/fullstack.svg" alt="Full Stack Development Diagram" style="width: 100%; height: auto;">
+          </div>
+
+          <div class="detail-card">
+            <h3>About The Full Stack Workshop</h3>
+            <p style="margin-bottom: 1rem;">
+              Conducted by senior student developers of <strong>Chathurya Student Developers Club</strong>, this 5-day hands-on workshop takes you from foundational HTML5 tags to connecting server APIs and database management.
+            </p>
+            <p>
+              You will write clean, maintainable code, master CSS Grid and Flexbox responsive layouts, build interactive JavaScript UI components, and deploy a capstone project to GitHub Pages.
+            </p>
+          </div>
+
+          <div class="detail-card">
+            <h3>What You Will Learn</h3>
+            <div class="curriculum-grid">
+              <div class="curriculum-box">
+                <h4>1. Frontend Development</h4>
+                <ul>
+                  <li>HTML5 &amp; Semantic Markup</li>
+                  <li>CSS3 Flexbox &amp; CSS Grid</li>
+                  <li>Responsive Mobile Interfaces</li>
+                  <li>JavaScript DOM Manipulation</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>2. Backend Development</h4>
+                <ul>
+                  <li>Server-Side Architecture Concepts</li>
+                  <li>RESTful APIs &amp; Routing</li>
+                  <li>HTTP Requests &amp; JSON Data</li>
+                  <li>Authentication &amp; Session Basics</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>3. Database Concepts</h4>
+                <ul>
+                  <li>Relational Database Basics</li>
+                  <li>Tables, Schema &amp; Keys</li>
+                  <li>CRUD Operations</li>
+                  <li>SQL Query Fundamentals</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>4. Developer Tools</h4>
+                <ul>
+                  <li>VS Code Setup &amp; Shortcuts</li>
+                  <li>Git Version Control</li>
+                  <li>GitHub Repository Hosting</li>
+                  <li>Browser Developer Console</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Full Stack Workshop Details</h3>
+            <div class="info-item">
+              <span class="info-label">Duration</span>
+              <span class="info-value">5 Days (Hands-on Sessions)</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Who Can Attend</span>
+              <span class="info-value">Students from any stream interested in web development.</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Requirements</span>
+              <ul style="font-size: 0.9rem; color: var(--text-secondary); padding-left: 1rem; list-style: disc;">
+                <li>Basic computer knowledge</li>
+                <li>Laptop recommended</li>
+                <li>Eagerness to code</li>
+              </ul>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Certification</span>
+              <span class="info-value" style="color: var(--accent);">Official Chathurya Certificate</span>
+            </div>
+            <a href="#register" onclick="selectCourseInForm('Full Stack Development')" class="btn btn-primary btn-block" style="padding: 1rem;">
+              Register for Full Stack →
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 6. DATA ANALYTICS SECTION ==================== -->
+  <section id="data-analytics" class="detail-section" style="border-top: 1px solid var(--border-subtle); padding-top: 5rem; background-color: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Detailed Workshop Syllabus
+        </div>
+        <h2>Data <span class="text-accent">Analytics</span></h2>
+        <p>Master Python data manipulation, cleaning datasets, exploratory analysis, and chart visualizations.</p>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-main">
+          <div class="detail-card" style="padding: 0; overflow: hidden;">
+            <img src="images/data-analytics.svg" alt="Data Analytics Diagram" style="width: 100%; height: auto;">
+          </div>
+
+          <div class="detail-card">
+            <h3>About The Data Analytics Workshop</h3>
+            <p style="margin-bottom: 1rem;">
+              Learn how to convert raw, unstructured data into valuable insights with <strong>Chathurya Student Developers Club</strong>. Python is the industry standard tool for data manipulation and visualization.
+            </p>
+            <p>
+              In this workshop, you will process real-world CSV/Excel datasets, clean missing data, compute summary statistical metrics, and create publication-ready charts using Pandas and Matplotlib.
+            </p>
+          </div>
+
+          <div class="detail-card">
+            <h3>What You Will Learn</h3>
+            <div class="curriculum-grid">
+              <div class="curriculum-box">
+                <h4>1. Python Fundamentals</h4>
+                <ul>
+                  <li>Python Syntax &amp; Data Types</li>
+                  <li>Lists, Tuples &amp; Dictionaries</li>
+                  <li>Control Flow &amp; Loops</li>
+                  <li>Functions &amp; Reusable Modules</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>2. Data Handling &amp; Cleaning</h4>
+                <ul>
+                  <li>Loading Datasets (CSV, Excel)</li>
+                  <li>Handling Missing Data &amp; Nulls</li>
+                  <li>Filtering &amp; Slicing DataFrames</li>
+                  <li>Grouping &amp; Aggregating Data</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>3. Pandas &amp; NumPy</h4>
+                <ul>
+                  <li>Pandas DataFrames &amp; Series</li>
+                  <li>NumPy N-Dimensional Arrays</li>
+                  <li>Vectorized Array Operations</li>
+                  <li>Merging &amp; Joining Data Tables</li>
+                </ul>
+              </div>
+
+              <div class="curriculum-box">
+                <h4>4. Data Visualization</h4>
+                <ul>
+                  <li>Bar Charts &amp; Column Graphs</li>
+                  <li>Line Charts &amp; Trend Curves</li>
+                  <li>Pie Charts &amp; Histograms</li>
+                  <li>Plotting with Matplotlib</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Data Analytics Workshop Details</h3>
+            <div class="info-item">
+              <span class="info-label">Duration</span>
+              <span class="info-value">5 Days (Hands-on Lab)</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Who Can Attend</span>
+              <span class="info-value">Students interested in data, Python, or analytics.</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Requirements</span>
+              <ul style="font-size: 0.9rem; color: var(--text-secondary); padding-left: 1rem; list-style: disc;">
+                <li>Basic computer knowledge</li>
+                <li>Laptop recommended</li>
+                <li>No prior coding required</li>
+              </ul>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Certification</span>
+              <span class="info-value" style="color: var(--accent);">Official Chathurya Certificate</span>
+            </div>
+            <a href="#register" onclick="selectCourseInForm('Data Analytics')" class="btn btn-primary btn-block" style="padding: 1rem;">
+              Register for Data Analytics →
+            </a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 7. REGISTRATION FORM SECTION ==================== -->
+  <section id="register" class="registration-section" style="border-top: 1px solid var(--border-subtle); padding-top: 5rem;">
+    <div class="container">
+      
+      <div class="form-wrapper">
+        <div class="form-header">
+          <div class="badge" style="margin-bottom: 0.75rem;">
+            <span class="badge-dot"></span>
+            Student Registration Portal
+          </div>
+          <h1>Workshop Registration</h1>
+          <p>Register for Chathurya Student Developers Club Technical Workshops</p>
+        </div>
+
+        <!-- Registration Form -->
+        <form id="workshopRegistrationForm" class="registration-form" novalidate>
+          
+          <!-- 1. Full Name -->
+          <div class="form-group">
+            <label for="fullName">Full Name <span style="color: var(--accent);">*</span></label>
+            <input type="text" id="fullName" class="form-control" placeholder="e.g. Alex Sharma" required>
+            <span class="error-message" id="fullNameError"></span>
+          </div>
+
+          <!-- Form Row: ID & Email -->
+          <div class="form-row">
+            <!-- 2. ID Card Number -->
+            <div class="form-group">
+              <label for="idCardNumber">College ID Card Number <span style="color: var(--accent);">*</span></label>
+              <input type="text" id="idCardNumber" class="form-control" placeholder="e.g. 2026-CS-1042" required>
+              <span class="error-message" id="idCardNumberError"></span>
+            </div>
+
+            <!-- 3. Email Address -->
+            <div class="form-group">
+              <label for="email">Email Address <span style="color: var(--accent);">*</span></label>
+              <input type="email" id="email" class="form-control" placeholder="alex@college.edu" required>
+              <span class="error-message" id="emailError"></span>
+            </div>
+          </div>
+
+          <!-- Form Row: Phone & Stream -->
+          <div class="form-row">
+            <!-- 4. Phone Number -->
+            <div class="form-group">
+              <label for="phone">Phone Number (10-Digit Mobile) <span style="color: var(--accent);">*</span></label>
+              <input type="tel" id="phone" class="form-control" placeholder="e.g. 9876543210" maxlength="10" required>
+              <span class="error-message" id="phoneError"></span>
+            </div>
+
+            <!-- 5. Stream -->
+            <div class="form-group">
+              <label for="stream">Academic Stream <span style="color: var(--accent);">*</span></label>
+              <select id="stream" class="form-control" required>
+                <option value="">Select Stream</option>
+                <option value="BCA">BCA (Bachelor of Computer Applications)</option>
+                <option value="B.Tech/BE">B.Tech / B.E (Engineering)</option>
+                <option value="BSc">B.Sc (Computer Science / IT / Science)</option>
+                <option value="BBA">BBA (Business Administration)</option>
+                <option value="B.Com">B.Com (Commerce)</option>
+                <option value="BA">BA (Arts / Humanities)</option>
+                <option value="Other">Other Stream</option>
+              </select>
+              <span class="error-message" id="streamError"></span>
+            </div>
+          </div>
+
+          <!-- Form Row: Course & Class -->
+          <div class="form-row">
+            <!-- 6. Course -->
+            <div class="form-group">
+              <label for="course">Workshop Course <span style="color: var(--accent);">*</span></label>
+              <select id="course" class="form-control" required>
+                <option value="">Select Course</option>
+                <option value="Full Stack Development">Full Stack Development</option>
+                <option value="Data Analytics">Data Analytics</option>
+              </select>
+              <span class="error-message" id="courseError"></span>
+            </div>
+
+            <!-- 7. Class -->
+            <div class="form-group">
+              <label for="className">Year / Class <span style="color: var(--accent);">*</span></label>
+              <select id="className" class="form-control" required>
+                <option value="">Select Class / Year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+              </select>
+              <span class="error-message" id="classNameError"></span>
+            </div>
+          </div>
+
+          <!-- Form Row: Section & Laptop -->
+          <div class="form-row">
+            <!-- 8. Section -->
+            <div class="form-group">
+              <label for="section">Class Section <span style="color: var(--accent);">*</span></label>
+              <input type="text" id="section" class="form-control" placeholder="e.g. A, B, C, CS-1" required>
+              <span class="error-message" id="sectionError"></span>
+            </div>
+
+            <!-- 9. Laptop Availability -->
+            <div class="form-group">
+              <label>Do you have a laptop? <span style="color: var(--accent);">*</span></label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="hasLaptop" value="Yes" required>
+                  <span>Yes, I have a laptop</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="hasLaptop" value="No">
+                  <span>No laptop</span>
+                </label>
+              </div>
+              <span class="error-message" id="laptopError"></span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 1.1rem; font-size: 1.05rem;">
+              Complete Registration →
+            </button>
+          </div>
+
+        </form>
+
+        <!-- ==================== REGISTRATION SUCCESS CARD ==================== -->
+        <div id="registrationSuccessCard" class="success-card">
+          <div class="success-icon">✓</div>
+          <h2>Registration Successful!</h2>
+          <p style="margin-top: 0.5rem;">
+            Thank you for registering with <strong>Chathurya Student Developers Club</strong>. Your workshop seat has been reserved!
+          </p>
+
+          <table class="confirmation-table">
+            <tbody id="confirmationTableBody">
+              <!-- Rendered dynamically by js/registration.js -->
+            </tbody>
+          </table>
+
+          <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <a href="#home" class="btn btn-primary">Back to Top</a>
+            <a href="#courses" class="btn btn-secondary">Explore Workshops</a>
+          </div>
+        </div>
+
+        <!-- Institutional Information Box -->
+        <div class="institutional-info">
+          <p><strong>Chathurya Student Developers Club</strong> | College Campus</p>
+          <p>Address: Tech Building Block B, Innovation Way, College Campus, 560100</p>
+          <p>Official Email: chathurya.club@college.edu | Helpline: +91 98765 43210</p>
+          <p style="margin-top: 0.5rem; color: var(--text-secondary);">
+            <em>"Conducted as part of the official student technical and learning activities of Chathurya Student Developers Club."</em>
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==================== COMMON FOOTER ==================== -->
+  <footer id="contact" class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="footer-brand">
+            <img src="images/logo.svg" alt="Chathurya Student Developers Club Logo">
+          </div>
+          <p>
+            Official Student Technical &amp; Developer Community dedicated to practical coding bootcamps, workshops, and student tech growth.
+          </p>
+          <div class="social-links">
+            <a href="https://linkedin.com" target="_blank" class="social-icon" aria-label="LinkedIn">in</a>
+            <a href="https://github.com" target="_blank" class="social-icon" aria-label="GitHub">gh</a>
+            <a href="https://instagram.com" target="_blank" class="social-icon" aria-label="Instagram">ig</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <div class="footer-links">
+            <a href="#home">Home</a>
+            <a href="#about">About Us</a>
+            <a href="#events">Previous Events</a>
+            <a href="#courses">Courses Overview</a>
+            <a href="#fullstack">Full Stack Details</a>
+            <a href="#data-analytics">Data Analytics Details</a>
+            <a href="#register">Workshop Registration</a>
+          </div>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contact &amp; Club Info</h4>
+          <p><strong>Chathurya Student Developers Club</strong></p>
+          <p>Tech Campus Block B, College Campus, 560100</p>
+          <p>Email: <a href="mailto:chathurya.club@college.edu" style="color: var(--accent);">chathurya.club@college.edu</a></p>
+          <p>Phone: +91 98765 43210</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 Chathurya Student Developers Club. All Rights Reserved.</p>
+        <p style="font-size: 0.8rem;">Conducted as part of the official student technical and learning activities of Chathurya Student Developers Club.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script src="js/registration.js"></script>
+  <script>
+    function selectCourseInForm(courseName) {
+      const select = document.getElementById('course');
+      if (select) {
+        select.value = courseName;
+      }
+    }
+  </script>
+</body>
+</html>
