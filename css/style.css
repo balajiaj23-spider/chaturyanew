@@ -1055,6 +1055,17 @@ p {
   color: var(--accent);
 }
 
+.address-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.address-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .social-links {
   display: flex;
   gap: 1rem;
