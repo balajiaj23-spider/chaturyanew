@@ -177,7 +177,7 @@
 
       <div class="courses-grid">
         <!-- Course 1: Full Stack Development -->
-        <div class="course-card">
+        <article class="course-card" onclick="window.location.href='fullstack.html'" style="cursor: pointer;">
           <div class="course-banner">
             <img src="images/fullstack.svg" alt="Full Stack Development Workshop">
           </div>
@@ -193,11 +193,14 @@
               <span class="tech-tag">Flask</span>
               <span class="tech-tag">Git &amp; VS Code</span>
             </div>
+            <div style="margin-top: 1.25rem;">
+              <a href="fullstack.html" class="btn btn-primary btn-block" style="text-align: center;" onclick="event.stopPropagation();">View Full Course Details</a>
+            </div>
           </div>
-        </div>
+        </article>
 
         <!-- Course 2: Data Analytics -->
-        <div class="course-card">
+        <article class="course-card" onclick="window.location.href='data-analytics.html'" style="cursor: pointer;">
           <div class="course-banner">
             <img src="images/data-analytics.svg" alt="Data Analytics Workshop">
           </div>
@@ -213,8 +216,11 @@
               <span class="tech-tag">Tableau Analytics</span>
               <span class="tech-tag">Dashboards</span>
             </div>
+            <div style="margin-top: 1.25rem;">
+              <a href="data-analytics.html" class="btn btn-primary btn-block" style="text-align: center;" onclick="event.stopPropagation();">View Full Course Details</a>
+            </div>
           </div>
-        </div>
+        </article>
       </div>
 
       <!-- Prominent Centered View Course Button -->
