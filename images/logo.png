@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" width="340" height="80">
-  <rect width="100%" height="100%" fill="none"/>
-  <rect x="10" y="15" width="50" height="50" rx="14" fill="#181818" stroke="#b6ff00" stroke-width="2"/>
-  <path d="M 25 32 L 35 40 L 25 48" fill="none" stroke="#b6ff00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <line x1="38" y1="48" x2="46" y2="48" stroke="#b6ff00" stroke-width="3" stroke-linecap="round"/>
-  <text x="72" y="40" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="19" font-weight="800" fill="#ffffff" letter-spacing="-0.5">CHATHURYA<tspan fill="#b6ff00"> CLUB</tspan></text>
-  <text x="73" y="57" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="9.5" font-weight="700" fill="#a0a0a0" letter-spacing="1.2">STUDENT DEVELOPERS CLUB</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 75" width="380" height="75">
+  <g transform="translate(10, 10) scale(0.38)" fill="#b6ff00" fill-rule="evenodd">
+    <path d="M 68 15 C 30 15, 0 42, 0 80 C 0 118, 30 145, 68 145 C 88 145, 106 136, 118 122 L 98 104 C 89 114, 78 120, 66 120 C 42 120, 24 102, 24 80 C 24 58, 42 40, 66 40 C 78 40, 89 46, 96 56 L 116 38 C 104 24, 87 15, 68 15 Z" />
+    <path d="M 106 35 L 126 19 C 152 50, 172 70, 195 70 C 212 70, 224 59, 224 46 C 224 33, 212 22, 195 22 C 172 22, 150 44, 126 74 C 102 104, 78 126, 52 126 C 33 126, 20 115, 20 100 C 20 85, 33 74, 52 74 L 52 50 C 20 50, 0 72, 0 100 C 0 128, 22 150, 52 150 C 85 150, 110 126, 136 94 C 160 126, 185 150, 218 150 C 248 150, 272 128, 272 100 C 272 72, 248 50, 218 50 C 185 50, 160 74, 136 106 L 106 35 Z" />
+  </g>
+  <text x="122" y="38" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="21" font-weight="800" fill="#ffffff" letter-spacing="-0.5">CHATHURYA<tspan fill="#b6ff00"> CLUB</tspan></text>
+  <text x="123" y="56" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="9.5" font-weight="700" fill="#a0a0a0" letter-spacing="1.4">STUDENT DEVELOPERS CLUB</text>
 </svg>
