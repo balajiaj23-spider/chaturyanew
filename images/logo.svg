@@ -1,43 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 75" width="380" height="75">
-  <!-- Completely Transparent Background -->
-
-  <!-- Chathurya C+Infinity Icon Mark (Transparent, Neon Lime) -->
-  <g transform="translate(10, 10) scale(0.38)" fill="#b6ff00" fill-rule="evenodd">
-    <!-- C Outer Ring -->
-    <path d="M 68 15 
-             C 30 15, 0 42, 0 80 
-             C 0 118, 30 145, 68 145 
-             C 88 145, 106 136, 118 122 
-             L 98 104 
-             C 89 114, 78 120, 66 120 
-             C 42 120, 24 102, 24 80 
-             C 24 58, 42 40, 66 40 
-             C 78 40, 89 46, 96 56 
-             L 116 38 
-             C 104 24, 87 15, 68 15 Z" />
-
-    <!-- Infinity Loop with Angled Cut -->
-    <path d="M 106 35 
-             L 126 19 
-             C 152 50, 172 70, 195 70 
-             C 212 70, 224 59, 224 46 
-             C 224 33, 212 22, 195 22 
-             C 172 22, 150 44, 126 74 
-             C 102 104, 78 126, 52 126 
-             C 33 126, 20 115, 20 100 
-             C 20 85, 33 74, 52 74 
-             L 52 50 
-             C 20 50, 0 72, 0 100 
-             C 0 128, 22 150, 52 150 
-             C 85 150, 110 126, 136 94 
-             C 160 126, 185 150, 218 150 
-             C 248 150, 272 128, 272 100 
-             C 272 72, 248 50, 218 50 
-             C 185 50, 160 74, 136 106 
-             L 106 35 Z" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 75" width="420" height="75">
+  <!-- Transparent Background -->
+  
+  <!-- Custom Chathurya C+Infinity Icon Mark (Stroke-based, Crisp, No Artifacts) -->
+  <g transform="translate(10, 8) scale(0.6)" stroke="#b6ff00" stroke-width="17" fill="none" stroke-linecap="butt">
+    <!-- Left C Arc -->
+    <path d="M 60 18 A 32 32 0 1 0 60 82" />
+    <!-- Right Infinity Loop -->
+    <path d="M 68 20 C 102 20, 118 80, 152 80 C 174 80, 186 68, 186 50 C 186 32, 174 20, 152 20 C 118 20, 102 80, 60 80" />
   </g>
 
-  <!-- Text Section -->
-  <text x="122" y="38" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="21" font-weight="800" fill="#ffffff" letter-spacing="-0.5">CHATHURYA<tspan fill="#b6ff00"> CLUB</tspan></text>
-  <text x="123" y="56" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="9.5" font-weight="700" fill="#a0a0a0" letter-spacing="1.4">STUDENT DEVELOPERS CLUB</text>
+  <!-- Chathurya Club Brand Text -->
+  <text x="135" y="38" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="-0.5">CHATHURYA<tspan fill="#b6ff00"> CLUB</tspan></text>
+  <text x="136" y="56" font-family="'Inter', system-ui, -apple-system, sans-serif" font-size="9.5" font-weight="700" fill="#a0a0a0" letter-spacing="1.4">STUDENT DEVELOPERS CLUB</text>
 </svg>
