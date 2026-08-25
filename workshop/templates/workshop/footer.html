@@ -29,6 +29,11 @@
           <a href="{% url 'home' %}#events">Previous Events</a>
           <a href="{% url 'courses_list' %}">Courses</a>
           <a href="{% url 'home' %}#contact">Contact</a>
+          {% if user.is_authenticated and user.is_staff %}
+            <a href="{% url 'admin_dashboard' %}" style="color: var(--accent); font-weight: 600;">Admin Dashboard</a>
+          {% else %}
+            <a href="{% url 'admin_login' %}">Admin Login</a>
+          {% endif %}
         </div>
       </div>
 
