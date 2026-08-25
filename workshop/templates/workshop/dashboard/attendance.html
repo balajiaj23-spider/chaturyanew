@@ -182,43 +182,74 @@
     } catch(e) {}
   }
 
-  function startCamera() {
+  function stopCamera() {
+    isScanning = false;
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => {
+        try {
+          track.stop();
+        } catch(e) {}
+      });
+      videoStream = null;
+    }
     const video = document.getElementById('scannerVideo');
+    if (video) {
+      video.srcObject = null;
+    }
     const badge = document.getElementById('cameraStatusBadge');
-
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-        .then(function(stream) {
-          videoStream = stream;
-          video.srcObject = stream;
-          video.setAttribute("playsinline", true);
-          video.play();
-          isScanning = true;
-          badge.textContent = "Scanning Live...";
-          badge.style.background = "#28a745";
-          badge.style.color = "#fff";
-          requestAnimationFrame(scanFrame);
-        })
-        .catch(function(err) {
-          alert("Camera Access Error: " + err.message);
-          badge.textContent = "Camera Error";
-          badge.style.background = "#ff5f56";
-        });
-    } else {
-      alert("Browser does not support camera access.");
+    if (badge) {
+      badge.textContent = "Camera Stopped";
+      badge.style.background = "var(--bg-secondary)";
+      badge.style.color = "var(--text-secondary)";
     }
   }
 
-  function stopCamera() {
-    if (videoStream) {
-      videoStream.getTracks().forEach(track => track.stop());
-      videoStream = null;
-    }
-    isScanning = false;
+  function startCamera() {
+    // Stop any existing stream & release camera hardware lock first
+    stopCamera();
+
+    const video = document.getElementById('scannerVideo');
     const badge = document.getElementById('cameraStatusBadge');
-    badge.textContent = "Camera Stopped";
-    badge.style.background = "var(--bg-secondary)";
-    badge.style.color = "var(--text-secondary)";
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Browser does not support camera access.");
+      return;
+    }
+
+    badge.textContent = "Requesting Camera...";
+    badge.style.background = "#ffc107";
+    badge.style.color = "#000";
+
+    function handleStreamSuccess(stream) {
+      videoStream = stream;
+      video.srcObject = stream;
+      video.setAttribute("playsinline", true);
+      video.play().then(() => {
+        isScanning = true;
+        badge.textContent = "Scanning Live...";
+        badge.style.background = "#28a745";
+        badge.style.color = "#fff";
+        requestAnimationFrame(scanFrame);
+      }).catch(err => {
+        console.warn("Video play promise error:", err);
+      });
+    }
+
+    // Try ideal environment camera first, then fall back to any video device
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } })
+      .then(handleStreamSuccess)
+      .catch(function(err1) {
+        console.warn("Rear camera request failed, attempting fallback camera...", err1);
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(handleStreamSuccess)
+          .catch(function(err2) {
+            console.error("Camera access error:", err2);
+            badge.textContent = "Camera Error";
+            badge.style.background = "#ff5f56";
+            badge.style.color = "#fff";
+            alert("Camera Access Error: " + (err2.message || "Could not start camera source. Please check camera permissions and close any other application using the camera."));
+          });
+      });
   }
 
   function scanFrame() {
@@ -325,9 +356,11 @@
     checkboxes.forEach(c => c.checked = val);
   }
 
-  // Auto-start camera when page loads
+  // Auto-start camera when page loads and release on unload
   document.addEventListener("DOMContentLoaded", function() {
     startCamera();
   });
+  window.addEventListener("beforeunload", stopCamera);
+  window.addEventListener("pagehide", stopCamera);
 </script>
 {% endblock %}
