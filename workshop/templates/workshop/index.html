@@ -53,20 +53,32 @@
 
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-number">500+</div>
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="stat-number">200+</div>
             <div class="stat-label">Active Student Members</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
             <div class="stat-number">20+</div>
-            <div class="stat-label">Events &amp; Bootcamps</div>
+            <div class="stat-label">Real-World Projects Built</div>
           </div>
           <div class="stat-card">
-            <div class="stat-number">10+</div>
-            <div class="stat-label">Technical Workshops</div>
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            </div>
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Practical Hands-On Labs</div>
           </div>
           <div class="stat-card">
+            <div class="stat-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
             <div class="stat-number">95%</div>
-            <div class="stat-label">Project Completion</div>
+            <div class="stat-label">Project Completion Rate</div>
           </div>
         </div>
       </div>
@@ -143,7 +155,7 @@
                   <span class="tech-tag">{{ topic.section_title }}</span>
                 {% endfor %}
               </div>
-              <div style="margin-top: 1.25rem;">
+              <div class="course-card-actions" style="margin-top: 1.25rem;">
                 <a href="{% url 'course_detail' slug=course.slug %}" class="btn btn-primary btn-block" style="text-align: center;" onclick="event.stopPropagation();">View Full Course Details</a>
               </div>
             </div>

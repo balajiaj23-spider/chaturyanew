@@ -3,11 +3,11 @@
 <header class="navbar">
   <div class="container">
     <a href="{% url 'home' %}" class="nav-brand">
-      {% if site_settings.logo %}
-        <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.club_name }} Logo">
-      {% else %}
-        <img src="{% static 'images/logo.svg' %}" alt="{{ site_settings.club_name }} Logo">
-      {% endif %}
+      <img src="{% static 'images/chathurya-mark.png' %}" alt="Chathurya Logo Mark" class="brand-mark">
+      <div class="brand-text">
+        <span class="brand-title">CHATHURYA <span class="brand-accent">CLUB</span></span>
+        <span class="brand-subtitle">STUDENT DEVELOPERS CLUB</span>
+      </div>
     </a>
 
     <nav class="nav-menu">
