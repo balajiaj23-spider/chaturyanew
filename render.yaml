@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: college-workshop-portal
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn college_workshop.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "false"
+      - key: PYTHON_VERSION
+        value: 3.12.4
