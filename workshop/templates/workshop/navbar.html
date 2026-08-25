@@ -10,16 +10,23 @@
       </div>
     </a>
 
+    <!-- Main Navigation Menu (Inner Register kept) -->
     <nav class="nav-menu">
       <a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
       <a href="{% url 'home' %}#about" class="nav-link">About Us</a>
       <a href="{% url 'home' %}#events" class="nav-link">Previous Events</a>
       <a href="{% url 'courses_list' %}" class="nav-link {% if request.resolver_match.url_name == 'courses_list' %}active{% endif %}">Courses</a>
-      <a href="{% url 'home' %}#contact" class="nav-link">Contact</a>
+      <a href="{% url 'registration' %}" class="nav-link {% if request.resolver_match.url_name == 'registration' %}active{% endif %}">Register</a>
     </nav>
 
+    <!-- Header Actions (Right-side Admin Login & Register Now kept) -->
     <div class="nav-actions">
       <button type="button" class="theme-toggle-btn" aria-label="Toggle dark/light theme" title="Toggle theme">☀️</button>
+      {% if user.is_authenticated and user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">Admin Dashboard</a>
+      {% else %}
+        <a href="{% url 'admin_login' %}" class="btn btn-secondary btn-sm">Admin Login</a>
+      {% endif %}
       <a href="{% url 'registration' %}" class="btn btn-primary btn-sm">Register Now</a>
       <button type="button" class="mobile-toggle" aria-label="Toggle mobile navigation menu" aria-expanded="false">☰</button>
     </div>
@@ -31,7 +38,12 @@
     <a href="{% url 'home' %}#about" class="nav-link">About Us</a>
     <a href="{% url 'home' %}#events" class="nav-link">Previous Events</a>
     <a href="{% url 'courses_list' %}" class="nav-link">Courses</a>
-    <a href="{% url 'home' %}#contact" class="nav-link">Contact</a>
+    <a href="{% url 'registration' %}" class="nav-link">Register</a>
+    {% if user.is_authenticated and user.is_staff %}
+      <a href="{% url 'admin_dashboard' %}" class="nav-link">Admin Dashboard</a>
+    {% else %}
+      <a href="{% url 'admin_login' %}" class="nav-link">Admin Login</a>
+    {% endif %}
     <a href="{% url 'registration' %}" class="btn btn-primary btn-block">Register Now</a>
   </div>
 </header>
