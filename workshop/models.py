@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.utils import timezone
 
 class SiteSettings(models.Model):
     club_name = models.CharField(max_length=200, default='Chathurya Student Developers Club')
@@ -8,8 +9,8 @@ class SiteSettings(models.Model):
     hero_title = models.CharField(max_length=200, default='Learn. Build. Launch.')
     hero_subtitle = models.TextField(default='Welcome to Chathurya Student Developers Club. Join our hands-on technical workshops designed to help students build practical skills, explore modern software technologies, and launch real-world projects.')
     about_text = models.TextField(default='Chathurya Student Developers Club is a premier student-led technical community dedicated to nurturing coding talent, practical software engineering, and data science skills.')
-    contact_email = models.EmailField(default='chathurya.club@college.edu')
-    contact_phone = models.CharField(max_length=50, default='+91 98765 43210')
+    contact_email = models.EmailField(default='chathuryasdc@gmail.com')
+    contact_phone = models.CharField(max_length=50, default='', blank=True)
     address = models.TextField(default='Tech Building Block B, Innovation Way, College Campus, 560100')
     instagram_url = models.URLField(blank=True, default='https://instagram.com')
     facebook_url = models.URLField(blank=True, default='https://facebook.com')
@@ -107,6 +108,7 @@ class CourseProject(models.Model):
 
 class Registration(models.Model):
     STREAM_CHOICES = [
+        ('', 'Select Stream'),
         ('BCA', 'BCA'),
         ('B.Com', 'B.Com'),
         ('BBA', 'BBA'),
@@ -116,18 +118,25 @@ class Registration(models.Model):
     ]
 
     COURSE_CHOICES = [
+        ('', 'Select Course'),
         ('Full Stack Development', 'Full Stack Development'),
         ('Data Analytics', 'Data Analytics'),
     ]
 
     YEAR_CHOICES = [
+        ('', 'Select Year of Study'),
         ('1st Year', '1st Year'),
         ('2nd Year', '2nd Year'),
         ('3rd Year', '3rd Year'),
-        ('4th Year', '4th Year'),
     ]
 
-    SECTION_CHOICES = [(c, c) for c in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]
+    SECTION_CHOICES = [('', 'Select Section')] + [(c, c) for c in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']]
+
+    LAPTOP_CHOICES = [
+        ('', 'Select Laptop Availability'),
+        ('Yes', 'Yes'),
+        ('No', 'No'),
+    ]
 
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
@@ -144,7 +153,7 @@ class Registration(models.Model):
     course = models.CharField(max_length=100, choices=COURSE_CHOICES)
     year_of_study = models.CharField(max_length=50, choices=YEAR_CHOICES)
     section = models.CharField(max_length=10, choices=SECTION_CHOICES)
-    has_laptop = models.CharField(max_length=10, choices=[('Yes', 'Yes'), ('No', 'No')])
+    has_laptop = models.CharField(max_length=50, choices=LAPTOP_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     registration_date = models.DateTimeField(auto_now_add=True)
 
@@ -158,3 +167,20 @@ class Registration(models.Model):
 
     def __str__(self):
         return f"{self.full_name} ({self.college_id}) - {self.course}"
+
+
+class AttendanceRecord(models.Model):
+    registration = models.ForeignKey(Registration, on_delete=models.CASCADE, related_name='attendance_records')
+    course_name = models.CharField(max_length=100)
+    session_day = models.IntegerField(default=1, help_text="Day 1 to 15")
+    date = models.DateField(default=timezone.now)
+    is_present = models.BooleanField(default=True)
+    scan_timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('registration', 'session_day')
+        ordering = ['-scan_timestamp']
+
+    def __str__(self):
+        status = "Present" if self.is_present else "Absent"
+        return f"Day {self.session_day} - {self.registration.full_name}: {status}"

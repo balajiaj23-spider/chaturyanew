@@ -1,10 +1,13 @@
+import csv
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q
-from .models import SiteSettings, PreviousEvent, Course, CourseTopic, CourseProject, Registration
+from django.http import JsonResponse, HttpResponse
+from .models import SiteSettings, PreviousEvent, Course, CourseTopic, CourseProject, Registration, AttendanceRecord
 from .forms import RegistrationForm, SiteSettingsForm, CourseForm, CourseTopicForm, PreviousEventForm, RegistrationAdminForm
 
 def is_staff_user(user):
@@ -189,15 +192,28 @@ def admin_registrations_list_view(request):
 
 
 @user_passes_test(is_staff_user, login_url='admin_login')
+def admin_update_registration_status_view(request, reg_id):
+    if request.method == 'POST':
+        registration = get_object_or_404(Registration, registration_id=reg_id)
+        status_action = request.POST.get('status_action', '')
+        if status_action == 'accept':
+            registration.status = 'Confirmed'
+            registration.save()
+            messages.success(request, f"Registration {registration.registration_id} for {registration.full_name} accepted and confirmed.")
+        elif status_action == 'reject':
+            registration.status = 'Cancelled'
+            registration.save()
+            messages.warning(request, f"Registration {registration.registration_id} for {registration.full_name} rejected.")
+    
+    redirect_url = request.META.get('HTTP_REFERER', 'admin_dashboard')
+    return redirect(redirect_url)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
 def admin_registration_detail_view(request, reg_id):
     registration = get_object_or_404(Registration, registration_id=reg_id)
     
     if request.method == 'POST':
-        if 'delete_registration' in request.POST:
-            registration.delete()
-            messages.success(request, 'Registration deleted successfully.')
-            return redirect('admin_registrations_list')
-        
         form = RegistrationAdminForm(request.POST, instance=registration)
         if form.is_valid():
             form.save()
@@ -278,3 +294,220 @@ def admin_settings_edit_view(request):
         form = SiteSettingsForm(instance=site_settings)
 
     return render(request, 'workshop/dashboard/settings_edit.html', {'form': form, 'site_settings': site_settings})
+
+
+# ==================== ATTENDANCE & COMPUTER VISION QR VIEWS ====================
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_attendance_view(request):
+    site_settings = SiteSettings.load()
+    selected_course = request.GET.get('course', 'Full Stack Development')
+    try:
+        selected_day = int(request.GET.get('day', 1))
+    except ValueError:
+        selected_day = 1
+
+    if selected_day < 1:
+        selected_day = 1
+    elif selected_day > 15:
+        selected_day = 15
+
+    # Get enrolled students for selected course
+    students = Registration.objects.filter(course=selected_course).order_by('full_name')
+
+    # Process bulk manual form submission
+    if request.method == 'POST':
+        present_student_ids = request.POST.getlist('present_students')
+        for student in students:
+            is_present = str(student.id) in present_student_ids
+            AttendanceRecord.objects.update_or_create(
+                registration=student,
+                session_day=selected_day,
+                defaults={
+                    'course_name': selected_course,
+                    'is_present': is_present,
+                }
+            )
+        messages.success(request, f"Attendance updated for {selected_course} - Day {selected_day}.")
+        return redirect(f"{request.path}?course={selected_course}&day={selected_day}")
+
+    # Build attendance status map for current day
+    attendance_records = AttendanceRecord.objects.filter(
+        registration__course=selected_course,
+        session_day=selected_day
+    )
+    attendance_map = {att.registration.registration_id: att.is_present for att in attendance_records}
+
+    students_list = []
+    for student in students:
+        students_list.append({
+            'id': student.id,
+            'registration_id': student.registration_id,
+            'full_name': student.full_name,
+            'college_id': student.college_id,
+            'section': student.section,
+            'is_present': attendance_map.get(student.registration_id, False),
+        })
+
+    context = {
+        'site_settings': site_settings,
+        'selected_course': selected_course,
+        'selected_day': selected_day,
+        'students': students_list,
+        'days_range': range(1, 16),
+        'courses_list': ['Full Stack Development', 'Data Analytics'],
+    }
+    return render(request, 'workshop/dashboard/attendance.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_attendance_scan_api(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+        except (json.JSONDecodeError, TypeError):
+            data = request.POST
+
+        qr_payload = data.get('qr_payload', '').strip()
+        course_name = data.get('course_name', 'Full Stack Development').strip()
+        try:
+            session_day = int(data.get('session_day', 1))
+        except ValueError:
+            session_day = 1
+
+        if not qr_payload:
+            return JsonResponse({'success': False, 'message': 'Empty QR payload scanned.'}, status=400)
+
+        # Lookup registration by registration_id or college_id
+        student = Registration.objects.filter(
+            Q(registration_id__iexact=qr_payload) | Q(college_id__iexact=qr_payload)
+        ).first()
+
+        if not student:
+            return JsonResponse({
+                'success': False,
+                'message': f"No student registration found matching ID '{qr_payload}'."
+            }, status=404)
+
+        # Check course match
+        if student.course.lower() != course_name.lower():
+            return JsonResponse({
+                'success': False,
+                'message': f"Student '{student.full_name}' is enrolled in '{student.course}', not in '{course_name}'!"
+            }, status=400)
+
+        # Record attendance
+        record, created = AttendanceRecord.objects.update_or_create(
+            registration=student,
+            session_day=session_day,
+            defaults={
+                'course_name': course_name,
+                'is_present': True,
+            }
+        )
+
+        already_marked = not created and record.is_present
+        total_present = AttendanceRecord.objects.filter(
+            registration__course=course_name,
+            session_day=session_day,
+            is_present=True
+        ).count()
+
+        return JsonResponse({
+            'success': True,
+            'already_marked': already_marked,
+            'student_id': student.registration_id,
+            'full_name': student.full_name,
+            'college_id': student.college_id,
+            'course': student.course,
+            'stream': student.stream,
+            'year_of_study': student.year_of_study,
+            'section': student.section,
+            'session_day': session_day,
+            'total_present_today': total_present,
+            'message': f"SUCCESS: Marked Present for {student.full_name} ({student.college_id})!"
+        })
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'}, status=405)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_attendance_summary_view(request):
+    site_settings = SiteSettings.load()
+    selected_course = request.GET.get('course', 'Full Stack Development')
+    students = Registration.objects.filter(course=selected_course).order_by('full_name')
+
+    # Build student matrix stats
+    summary_data = []
+    for student in students:
+        records = AttendanceRecord.objects.filter(registration=student)
+        day_list = []
+        present_count = 0
+        for day in range(1, 16):
+            rec = records.filter(session_day=day).first()
+            is_p = bool(rec and rec.is_present)
+            if is_p:
+                present_count += 1
+            day_list.append(is_p)
+
+        percentage = round((present_count / 15.0) * 100, 1)
+        eligible_for_certificate = percentage >= 80.0
+
+        summary_data.append({
+            'student': student,
+            'day_list': day_list,
+            'present_count': present_count,
+            'percentage': percentage,
+            'eligible': eligible_for_certificate,
+        })
+
+    context = {
+        'site_settings': site_settings,
+        'selected_course': selected_course,
+        'summary_data': summary_data,
+        'days_range': range(1, 16),
+        'courses_list': ['Full Stack Development', 'Data Analytics'],
+    }
+    return render(request, 'workshop/dashboard/attendance_summary.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_export_attendance_csv(request):
+    selected_course = request.GET.get('course', 'Full Stack Development')
+    response = HttpResponse(content_type='text/csv')
+    filename = f"Attendance_Report_{selected_course.replace(' ', '_')}.csv"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    writer = csv.writer(response)
+    header = ['Registration ID', 'Student Name', 'College ID', 'Course', 'Stream', 'Year', 'Section'] + [f'Day {d}' for d in range(1, 16)] + ['Total Present', 'Percentage', 'Certificate Status']
+    writer.writerow(header)
+
+    students = Registration.objects.filter(course=selected_course).order_by('full_name')
+    for student in students:
+        records = AttendanceRecord.objects.filter(registration=student)
+        day_cells = []
+        present_count = 0
+        for day in range(1, 16):
+            rec = records.filter(session_day=day).first()
+            if rec and rec.is_present:
+                day_cells.append('P')
+                present_count += 1
+            else:
+                day_cells.append('A')
+
+        pct = round((present_count / 15.0) * 100, 1)
+        cert_status = "Qualified (>=80%)" if pct >= 80.0 else "Not Qualified"
+
+        row = [
+            student.registration_id,
+            student.full_name,
+            student.college_id,
+            student.course,
+            student.stream,
+            student.year_of_study,
+            student.section,
+        ] + day_cells + [present_count, f"{pct}%", cert_status]
+
+        writer.writerow(row)
+
+    return response

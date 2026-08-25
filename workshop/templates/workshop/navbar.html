@@ -15,7 +15,7 @@
       <a href="{% url 'home' %}#about" class="nav-link">About Us</a>
       <a href="{% url 'home' %}#events" class="nav-link">Previous Events</a>
       <a href="{% url 'courses_list' %}" class="nav-link {% if request.resolver_match.url_name == 'courses_list' %}active{% endif %}">Courses</a>
-      <a href="{% url 'registration' %}" class="nav-link {% if request.resolver_match.url_name == 'registration' %}active{% endif %}">Register</a>
+      <a href="{% url 'home' %}#contact" class="nav-link">Contact</a>
     </nav>
 
     <div class="nav-actions">
@@ -31,7 +31,7 @@
     <a href="{% url 'home' %}#about" class="nav-link">About Us</a>
     <a href="{% url 'home' %}#events" class="nav-link">Previous Events</a>
     <a href="{% url 'courses_list' %}" class="nav-link">Courses</a>
-    <a href="{% url 'registration' %}" class="nav-link">Register</a>
+    <a href="{% url 'home' %}#contact" class="nav-link">Contact</a>
     <a href="{% url 'registration' %}" class="btn btn-primary btn-block">Register Now</a>
   </div>
 </header>

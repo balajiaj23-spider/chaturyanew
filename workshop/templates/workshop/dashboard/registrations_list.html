@@ -102,7 +102,27 @@
                 <td style="padding: 0.75rem;">{{ reg.stream }} / {{ reg.year_of_study }} / {{ reg.section }}</td>
                 <td style="padding: 0.75rem;">{% if reg.has_laptop == 'Yes' %}✓ Yes{% else %}✕ No{% endif %}</td>
                 <td style="padding: 0.75rem;"><span class="badge" style="background: {% if reg.status == 'Confirmed' %}var(--accent){% elif reg.status == 'Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">{{ reg.status }}</span></td>
-                <td style="padding: 0.75rem;"><a href="{% url 'admin_registration_detail' reg_id=reg.registration_id %}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Edit</a></td>
+                <td style="padding: 0.75rem;">
+                  <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: nowrap;">
+                    {% if reg.status != 'Confirmed' %}
+                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status_action" value="accept">
+                        <button type="submit" class="btn btn-sm" style="background: #28a745; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Accept Registration">✓ Accept</button>
+                      </form>
+                    {% endif %}
+
+                    {% if reg.status != 'Cancelled' %}
+                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="status_action" value="reject">
+                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Reject Registration">✕ Reject</button>
+                      </form>
+                    {% endif %}
+
+                    <a href="{% url 'admin_registration_detail' reg_id=reg.registration_id %}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Manage</a>
+                  </div>
+                </td>
               </tr>
             {% empty %}
               <tr>

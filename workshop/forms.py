@@ -10,15 +10,15 @@ class RegistrationForm(forms.ModelForm):
             'stream', 'course', 'year_of_study', 'section', 'has_laptop'
         ]
         widgets = {
-            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Alex Sharma', 'id': 'fullName'}),
-            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 24CA000', 'id': 'idCardNumber'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'student@college.edu', 'id': 'email'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Rahul Sharma', 'id': 'fullName'}),
+            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 24CA001', 'id': 'idCardNumber'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'rahul.sharma@gmail.com', 'id': 'email'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9876543210', 'maxlength': '10', 'id': 'phone'}),
             'stream': forms.Select(attrs={'class': 'form-control', 'id': 'stream'}),
             'course': forms.Select(attrs={'class': 'form-control', 'id': 'course'}),
             'year_of_study': forms.Select(attrs={'class': 'form-control', 'id': 'className'}),
             'section': forms.Select(attrs={'class': 'form-control', 'id': 'section'}),
-            'has_laptop': forms.RadioSelect(attrs={'class': 'radio-input'}),
+            'has_laptop': forms.Select(attrs={'class': 'form-control', 'id': 'hasLaptop'}),
         }
 
     def clean_full_name(self):

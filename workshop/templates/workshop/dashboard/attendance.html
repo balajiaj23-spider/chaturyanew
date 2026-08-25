@@ -1,0 +1,333 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Computer Vision Attendance — {{ selected_course }} (Day {{ selected_day }}){% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <!-- Navigation Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Computer Vision Attendance System</div>
+        <h2>📷 Student ID QR Scanner</h2>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+        <a href="{% url 'admin_attendance_summary' %}?course={{ selected_course }}" class="btn btn-secondary btn-sm">📊 Attendance Summary Grid</a>
+        <a href="{% url 'admin_attendance_export' %}?course={{ selected_course }}" class="btn btn-primary btn-sm">📥 Export CSV</a>
+      </div>
+    </div>
+
+    <!-- COURSE SEPARATION TABS -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-subtle);">
+      <a href="?course=Full Stack Development&day={{ selected_day }}" class="btn {% if selected_course == 'Full Stack Development' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+        💻 Full Stack Development
+      </a>
+      <a href="?course=Data Analytics&day={{ selected_day }}" class="btn {% if selected_course == 'Data Analytics' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+        📊 Data Analytics
+      </a>
+    </div>
+
+    <!-- DAY SELECTOR PILLS -->
+    <div class="detail-card" style="margin-bottom: 2rem; padding: 1.25rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Select Workshop Session Day:</h4>
+          <span style="font-size: 0.85rem; color: var(--text-secondary);">Currently Marking: <strong>{{ selected_course }} — Day {{ selected_day }} of 15</strong></span>
+        </div>
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+          {% for d in days_range %}
+            <a href="?course={{ selected_course }}&day={{ d }}" class="btn btn-sm {% if selected_day == d %}btn-primary{% else %}btn-secondary{% endif %}" style="min-width: 38px; text-align: center; font-weight: 700; padding: 0.4rem 0.6rem;">
+              D{{ d }}
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+      
+      <!-- LEFT COLUMN: COMPUTER VISION CAMERA SCANNER -->
+      <div>
+        <div class="detail-card" style="position: sticky; top: 90px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.15rem;">📷 Live Camera QR Scanner</h3>
+            <span id="cameraStatusBadge" class="badge" style="background: var(--accent); color: #000; font-weight: 700;">Camera Ready</span>
+          </div>
+
+          <!-- Video Viewport Box -->
+          <div id="scannerContainer" style="position: relative; width: 100%; height: 280px; background: #000; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--border-subtle); display: flex; align-items: center; justify-content: center;">
+            <video id="scannerVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <canvas id="scannerCanvas" style="display: none;"></canvas>
+            
+            <!-- Scanning Guide Reticle -->
+            <div id="scanReticle" style="position: absolute; width: 180px; height: 180px; border: 2px dashed var(--accent); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4); pointer-events: none;"></div>
+          </div>
+
+          <!-- Camera Controls -->
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; justify-content: space-between; align-items: center;">
+            <button type="button" id="startCamBtn" class="btn btn-primary btn-sm" onclick="startCamera()">▶ Start Camera</button>
+            <button type="button" id="stopCamBtn" class="btn btn-secondary btn-sm" onclick="stopCamera()">⏹ Stop Camera</button>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">Auto-scans student ID cards</span>
+          </div>
+
+          <!-- Live Scan Status Banner -->
+          <div id="scanResultBanner" style="margin-top: 1.25rem; padding: 1rem; border-radius: var(--radius-md); background: var(--bg-secondary); border: 1px solid var(--border-subtle); text-align: center; display: none;">
+            <div id="scanResultTitle" style="font-size: 1.1rem; font-weight: 700; color: var(--accent);">Ready to Scan</div>
+            <p id="scanResultMessage" style="margin: 0.25rem 0 0 0; font-size: 0.88rem; color: var(--text-secondary);"></p>
+          </div>
+
+          <!-- Manual ID Quick Input Fallback -->
+          <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+            <label style="font-size: 0.82rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Manual ID Entry / Barcode Scanner Input:</label>
+            <div style="display: flex; gap: 0.5rem;">
+              <input type="text" id="manualIdInput" placeholder="Enter Registration ID or College ID..." class="form-control" style="padding: 0.55rem; font-size: 0.9rem;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="submitManualId()" style="white-space: nowrap;">Mark Present</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: ENROLLED STUDENTS ROSTER CHECKLIST -->
+      <div>
+        <div class="detail-card">
+          <form method="POST" id="bulkAttendanceForm">
+            {% csrf_token %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div>
+                <h3 style="margin: 0; font-size: 1.15rem;">Student Roster ({{ students.count }})</h3>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">Day {{ selected_day }} Attendance Checklist</span>
+              </div>
+              <div style="display: flex; gap: 0.4rem;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(true)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Select All</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(false)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Clear All</button>
+              </div>
+            </div>
+
+            <div style="max-height: 480px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+              <table class="confirmation-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--border-subtle); background: var(--bg-secondary); position: sticky; top: 0;">
+                    <th style="padding: 0.6rem; text-align: center; width: 50px;">Status</th>
+                    <th style="padding: 0.6rem; text-align: left;">Student Name</th>
+                    <th style="padding: 0.6rem; text-align: left;">College ID</th>
+                    <th style="padding: 0.6rem; text-align: center;">Sec</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for s in students %}
+                    <tr id="row-{{ s.registration_id }}" style="border-bottom: 1px solid var(--border-subtle);">
+                      <td style="padding: 0.6rem; text-align: center;">
+                        <input type="checkbox" name="present_students" value="{{ s.id }}" id="chk-{{ s.registration_id }}" {% if s.is_present %}checked{% endif %} style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--accent);">
+                      </td>
+                      <td style="padding: 0.6rem; font-weight: 600; color: var(--text-primary);">
+                        {{ s.full_name }}
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ s.registration_id }}</div>
+                      </td>
+                      <td style="padding: 0.6rem;">{{ s.college_id }}</td>
+                      <td style="padding: 0.6rem; text-align: center;">{{ s.section }}</td>
+                    </tr>
+                  {% empty %}
+                    <tr>
+                      <td colspan="4" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No students enrolled in {{ selected_course }}.</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 1.25rem;">
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1rem;">
+                💾 Save Roster Attendance
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- COMPUTER VISION JS ENGINE (jsQR) -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+<script>
+  let videoStream = null;
+  let isScanning = false;
+  let lastScannedPayload = "";
+  let lastScanTime = 0;
+
+  const currentCourse = "{{ selected_course }}";
+  const currentDay = {{ selected_day }};
+  const scanApiUrl = "{% url 'admin_attendance_scan_api' %}";
+
+  // Audio Beep Chime Synthesizer
+  function playSuccessChime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch(e) {}
+  }
+
+  function startCamera() {
+    const video = document.getElementById('scannerVideo');
+    const badge = document.getElementById('cameraStatusBadge');
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(function(stream) {
+          videoStream = stream;
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          video.play();
+          isScanning = true;
+          badge.textContent = "Scanning Live...";
+          badge.style.background = "#28a745";
+          badge.style.color = "#fff";
+          requestAnimationFrame(scanFrame);
+        })
+        .catch(function(err) {
+          alert("Camera Access Error: " + err.message);
+          badge.textContent = "Camera Error";
+          badge.style.background = "#ff5f56";
+        });
+    } else {
+      alert("Browser does not support camera access.");
+    }
+  }
+
+  function stopCamera() {
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      videoStream = null;
+    }
+    isScanning = false;
+    const badge = document.getElementById('cameraStatusBadge');
+    badge.textContent = "Camera Stopped";
+    badge.style.background = "var(--bg-secondary)";
+    badge.style.color = "var(--text-secondary)";
+  }
+
+  function scanFrame() {
+    if (!isScanning) return;
+
+    const video = document.getElementById('scannerVideo');
+    const canvas = document.getElementById('scannerCanvas');
+    const ctx = canvas.getContext('2d');
+
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: "dontInvert",
+      });
+
+      if (code && code.data) {
+        const payload = code.data.trim();
+        const now = Date.now();
+        
+        // Cooldown 3 seconds for same QR payload
+        if (payload !== lastScannedPayload || (now - lastScanTime > 3000)) {
+          lastScannedPayload = payload;
+          lastScanTime = now;
+          processQrPayload(payload);
+        }
+      }
+    }
+    requestAnimationFrame(scanFrame);
+  }
+
+  function processQrPayload(payload) {
+    playSuccessChime();
+    
+    // Send AJAX POST to Scan API
+    fetch(scanApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: JSON.stringify({
+        qr_payload: payload,
+        course_name: currentCourse,
+        session_day: currentDay
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      showScanResult(data);
+      if (data.success && data.student_id) {
+        // Automatically check the student's checkbox in the roster
+        const chk = document.getElementById("chk-" + data.student_id);
+        if (chk) {
+          chk.checked = true;
+          const row = document.getElementById("row-" + data.student_id);
+          if (row) {
+            row.style.background = "rgba(40, 167, 69, 0.15)";
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }
+      }
+    })
+    .catch(err => {
+      showScanResult({ success: false, message: "Server connection error." });
+    });
+  }
+
+  function submitManualId() {
+    const input = document.getElementById("manualIdInput");
+    const val = input.value.trim();
+    if (val) {
+      processQrPayload(val);
+      input.value = "";
+    }
+  }
+
+  function showScanResult(data) {
+    const banner = document.getElementById("scanResultBanner");
+    const title = document.getElementById("scanResultTitle");
+    const msg = document.getElementById("scanResultMessage");
+
+    banner.style.display = "block";
+    if (data.success) {
+      banner.style.borderColor = "#28a745";
+      banner.style.background = "rgba(40, 167, 69, 0.1)";
+      title.style.color = "#28a745";
+      title.textContent = "✓ " + data.full_name + " (" + data.college_id + ")";
+      msg.textContent = data.message + " Total Present: " + data.total_present_today;
+    } else {
+      banner.style.borderColor = "#ff5f56";
+      banner.style.background = "rgba(255, 95, 86, 0.1)";
+      title.style.color = "#ff5f56";
+      title.textContent = "✕ Scan Error";
+      msg.textContent = data.message;
+    }
+  }
+
+  function markAll(val) {
+    const checkboxes = document.querySelectorAll('input[name="present_students"]');
+    checkboxes.forEach(c => c.checked = val);
+  }
+
+  // Auto-start camera when page loads
+  document.addEventListener("DOMContentLoaded", function() {
+    startCamera();
+  });
+</script>
+{% endblock %}

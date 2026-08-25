@@ -14,8 +14,8 @@ class Command(BaseCommand):
         settings.hero_title = 'Learn. Build. Launch.'
         settings.hero_subtitle = 'Welcome to Chathurya Student Developers Club. Join our hands-on technical workshops designed to help students build practical skills, explore modern software technologies, and launch real-world projects.'
         settings.about_text = 'Chathurya Student Developers Club is a premier student-led technical community dedicated to nurturing coding talent, practical software engineering, and data science skills.'
-        settings.contact_email = 'chathurya.club@college.edu'
-        settings.contact_phone = '+91 96321 65579'
+        settings.contact_email = 'chathuryasdc@gmail.com'
+        settings.contact_phone = ''
         settings.address = 'Seshadripuram College, 24, Nagappa Road, Bengaluru North, Karnataka'
         settings.save()
         self.stdout.write(self.style.SUCCESS("[OK] Site Settings initialized."))
@@ -51,11 +51,11 @@ class Command(BaseCommand):
         c1 = Course.objects.create(
             title='Full Stack Development',
             slug='fullstack',
-            badge_text='14-Day Workshop',
+            badge_text='15-Day Workshop',
             short_description='Master end-to-end web application development. Learn HTML, CSS, SQL, Python, Flask, and Git version control.',
             detailed_description='Learn how modern websites and web applications are built from scratch. Master frontend UI layout, backend APIs, SQLite database design, and Flask web deployment with Chathurya Student Developers Club.',
             image_path='images/fullstack.svg',
-            duration='14-Day Intensive Hands-on',
+            duration='15-Day Intensive Hands-on',
             who_can_attend='Students from any stream interested in web development.',
             requirements='Basic computer knowledge, Laptop recommended, Enthusiasm to code and build',
             capstone_title='College Canteen Pre-Order System',
@@ -92,11 +92,11 @@ class Command(BaseCommand):
         c2 = Course.objects.create(
             title='Data Analytics',
             slug='data-analytics',
-            badge_text='7-Day Workshop',
+            badge_text='15-Day Workshop',
             short_description='Master data cleaning, advanced Excel formulas, Power Pivot data modeling, VBA automation, and Tableau analytics dashboards.',
             detailed_description='Master Excel data cleaning, Power Query, advanced formulas, Power Pivot data modeling, VBA automation, and Tableau analytics dashboards with Chathurya Student Developers Club.',
             image_path='images/data-analytics.svg',
-            duration='7-Day Intensive Hands-on',
+            duration='15-Day Intensive Hands-on',
             who_can_attend='Students interested in data, analytics, Excel, or Tableau.',
             requirements='Basic computer knowledge, Laptop recommended, No prior coding experience required',
             capstone_title='Sales and Operations Analytics Dashboard',

@@ -1,0 +1,96 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}15-Day Attendance Summary Grid — {{ selected_course }}{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <!-- Admin Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>📊 15-Day Attendance Summary Grid</h2>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'admin_attendance' %}?course={{ selected_course }}" class="btn btn-secondary btn-sm">📷 Back to Vision Scanner</a>
+        <a href="{% url 'admin_attendance_export' %}?course={{ selected_course }}" class="btn btn-primary btn-sm">📥 Export CSV Report</a>
+      </div>
+    </div>
+
+    <!-- COURSE SEPARATION TABS -->
+    <div style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle);">
+      <a href="?course=Full Stack Development" class="btn {% if selected_course == 'Full Stack Development' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+        💻 Full Stack Development
+      </a>
+      <a href="?course=Data Analytics" class="btn {% if selected_course == 'Data Analytics' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+        📊 Data Analytics
+      </a>
+    </div>
+
+    <!-- Attendance Matrix Table -->
+    <div class="detail-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3>Attendance Roster &amp; Certificate Eligibility Matrix</h3>
+        <span style="font-size: 0.85rem; color: var(--text-secondary);">Course: <strong>{{ selected_course }}</strong></span>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="confirmation-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-subtle); background: var(--bg-secondary); text-align: center;">
+              <th style="padding: 0.6rem; text-align: left; min-width: 180px;">Student Name</th>
+              <th style="padding: 0.6rem; text-align: left;">College ID</th>
+              {% for d in days_range %}
+                <th style="padding: 0.4rem; min-width: 32px;">D{{ d }}</th>
+              {% endfor %}
+              <th style="padding: 0.6rem;">Days</th>
+              <th style="padding: 0.6rem;">%</th>
+              <th style="padding: 0.6rem; min-width: 130px;">Certificate</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in summary_data %}
+              <tr style="border-bottom: 1px solid var(--border-subtle); text-align: center;">
+                <td style="padding: 0.6rem; text-align: left; font-weight: 600; color: var(--text-primary);">
+                  {{ item.student.full_name }}
+                  <div style="font-size: 0.72rem; color: var(--text-secondary);">{{ item.student.registration_id }}</div>
+                </td>
+                <td style="padding: 0.6rem; text-align: left;">{{ item.student.college_id }}</td>
+                
+                {% for is_p in item.day_list %}
+                  <td style="padding: 0.4rem;">
+                    {% if is_p %}
+                      <span style="color: #28a745; font-weight: 800;">P</span>
+                    {% else %}
+                      <span style="color: var(--text-secondary); opacity: 0.3;">-</span>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+
+                <td style="padding: 0.6rem; font-weight: 700;">{{ item.present_count }}/15</td>
+                <td style="padding: 0.6rem; font-weight: 700; color: {% if item.percentage >= 80 %}var(--accent){% else %}#ff5f56{% endif %};">
+                  {{ item.percentage }}%
+                </td>
+                <td style="padding: 0.6rem;">
+                  {% if item.eligible %}
+                    <span class="badge" style="background: var(--accent); color: #000; font-weight: 700;">✓ Eligible</span>
+                  {% else %}
+                    <span class="badge" style="background: rgba(255,95,86,0.2); color: #ff5f56;">Needs 80%</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="21" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No student registrations found for {{ selected_course }}.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
