@@ -1,5 +1,6 @@
 # Python & Environment
 venv/
+.env
 *.pyc
 __pycache__/
 
