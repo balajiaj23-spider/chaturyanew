@@ -140,6 +140,8 @@ class Registration(models.Model):
 
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Rejected', 'Rejected'),
         ('Confirmed', 'Confirmed'),
         ('Cancelled', 'Cancelled'),
     ]
@@ -156,6 +158,22 @@ class Registration(models.Model):
     has_laptop = models.CharField(max_length=50, choices=LAPTOP_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     registration_date = models.DateTimeField(auto_now_add=True)
+
+    # Email Notification System Fields
+    approval_email_sent = models.BooleanField(default=False)
+    rejection_email_sent = models.BooleanField(default=False)
+    notification_status = models.CharField(
+        max_length=20,
+        choices=[('Not Sent', 'Not Sent'), ('Sent', 'Sent'), ('Failed', 'Failed')],
+        default='Not Sent'
+    )
+    notification_sent_at = models.DateTimeField(null=True, blank=True)
+    notification_type = models.CharField(
+        max_length=20,
+        choices=[('None', 'None'), ('Approval', 'Approval'), ('Rejection', 'Rejection')],
+        default='None'
+    )
+    notification_error = models.TextField(blank=True, default='')
 
     class Meta:
         ordering = ['-registration_date']

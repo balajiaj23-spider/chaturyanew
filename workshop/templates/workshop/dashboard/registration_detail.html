@@ -33,6 +33,36 @@
               <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Year of Study</th><td style="padding: 0.75rem; text-align: right;">{{ registration.year_of_study }}</td></tr>
               <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Section</th><td style="padding: 0.75rem; text-align: right;">{{ registration.section }}</td></tr>
               <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Laptop Availability</th><td style="padding: 0.75rem; text-align: right;">{{ registration.has_laptop }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration Status</th><td style="padding: 0.75rem; text-align: right;"><span class="badge" style="background: {% if registration.status in 'Approved Confirmed' %}var(--accent){% elif registration.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">{{ registration.status }}</span></td></tr>
+              
+              <!-- Email Notification Logging Fields -->
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Email Notification Status</th>
+                <td style="padding: 0.75rem; text-align: right;">
+                  {% if registration.notification_status == 'Sent' %}
+                    <span style="color: #28a745; font-weight: 700;">✓ Delivered ({{ registration.notification_type }})</span>
+                  {% elif registration.notification_status == 'Failed' %}
+                    <span style="color: #dc3545; font-weight: 700;">✕ Delivery Failed</span>
+                  {% else %}
+                    <span style="color: var(--text-muted);">Not Sent</span>
+                  {% endif %}
+                </td>
+              </tr>
+
+              {% if registration.notification_sent_at %}
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Email Delivered At</th>
+                  <td style="padding: 0.75rem; text-align: right; font-size: 0.88rem;">{{ registration.notification_sent_at }}</td>
+                </tr>
+              {% endif %}
+
+              {% if registration.notification_error %}
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <th style="padding: 0.75rem; text-align: left; color: #ff5f56;">Last Delivery Error</th>
+                  <td style="padding: 0.75rem; text-align: right; font-size: 0.82rem; color: #ff5f56; word-break: break-all;">{{ registration.notification_error }}</td>
+                </tr>
+              {% endif %}
+
               <tr><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration Submitted</th><td style="padding: 0.75rem; text-align: right; font-size: 0.9rem; color: var(--text-secondary);">{{ registration.registration_date }}</td></tr>
             </tbody>
           </table>
@@ -40,8 +70,39 @@
       </div>
 
       <aside class="detail-sidebar">
+        <div class="sidebar-card" style="margin-bottom: 1.5rem;">
+          <h3>Admin Quick Actions</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">Clicking Approve or Reject will automatically update the record and dispatch the transactional email notification.</p>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            {% if registration.status != 'Approved' and registration.status != 'Confirmed' %}
+              <form method="POST" action="{% url 'admin_update_status' reg_id=registration.registration_id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status_action" value="approve">
+                <button type="submit" class="btn btn-block" style="background: #28a745; color: #fff; border: none; font-weight: 700; padding: 0.8rem;">✓ Approve &amp; Send Email</button>
+              </form>
+            {% endif %}
+
+            {% if registration.status != 'Rejected' and registration.status != 'Cancelled' %}
+              <form method="POST" action="{% url 'admin_update_status' reg_id=registration.registration_id %}">
+                {% csrf_token %}
+                <input type="hidden" name="status_action" value="reject">
+                <button type="submit" class="btn btn-block" style="background: #dc3545; color: #fff; border: none; font-weight: 700; padding: 0.8rem;">✕ Reject &amp; Send Email</button>
+              </form>
+            {% endif %}
+
+            {% if registration.status != 'Pending' %}
+              <form method="POST" action="{% url 'admin_update_status' reg_id=registration.registration_id %}" style="margin-top: 0.5rem;">
+                {% csrf_token %}
+                <input type="hidden" name="status_action" value="resend_email">
+                <button type="submit" class="btn btn-secondary btn-block" style="font-weight: 600; padding: 0.75rem;">🔄 Resend Email Notification</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+
         <div class="sidebar-card">
-          <h3>Manage Status &amp; Record</h3>
+          <h3>Edit Manual Status</h3>
           
           <form method="POST">
             {% csrf_token %}
@@ -52,8 +113,8 @@
             </div>
 
             <div style="margin-top: 1rem;">
-              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.9rem;">
-                Save Status Changes
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.75rem;">
+                Save Status
               </button>
             </div>
           </form>
