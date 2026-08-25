@@ -1,4 +1,5 @@
 import logging
+import threading
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
@@ -6,14 +7,16 @@ from .models import SiteSettings
 
 logger = logging.getLogger(__name__)
 
-def send_approval_notification(registration, force_resend=False):
+def _async_send_approval_email(registration_id):
     """
-    Sends an automated approval email to the student.
-    Prevents duplicate emails unless force_resend is explicitly True.
+    Background worker thread to deliver approval email without blocking the web request.
     """
-    if registration.approval_email_sent and not force_resend:
-        logger.info(f"Approval email already sent for {registration.registration_id}. Skipping.")
-        return False, "Approval email already sent previously."
+    from .models import Registration
+    try:
+        registration = Registration.objects.get(registration_id=registration_id)
+    except Registration.DoesNotExist:
+        logger.error(f"Registration {registration_id} not found for async approval email.")
+        return
 
     site_settings = SiteSettings.load()
     college_name = site_settings.college_name or "Seshadripuram College"
@@ -39,7 +42,7 @@ def send_approval_notification(registration, force_resend=False):
         f"{college_name}\n"
     )
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'chathuryasdc@gmail.com')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Chathurya Club <chathuryastudentdeveloperclub@gmail.com>')
 
     try:
         send_mail(
@@ -63,12 +66,11 @@ def send_approval_notification(registration, force_resend=False):
             'notification_type',
             'notification_error'
         ])
-        logger.info(f"Approval email successfully sent to {registration.email} ({registration.registration_id})")
-        return True, "Approval email delivered successfully."
+        logger.info(f"Approval email successfully delivered to {registration.email} ({registration.registration_id})")
 
     except Exception as e:
         error_msg = str(e)
-        logger.error(f"Failed to send approval email to {registration.email}: {error_msg}")
+        logger.error(f"Failed to deliver approval email to {registration.email}: {error_msg}")
         
         # Record failure without rolling back Approved status
         registration.notification_status = 'Failed'
@@ -79,17 +81,18 @@ def send_approval_notification(registration, force_resend=False):
             'notification_type',
             'notification_error'
         ])
-        return False, f"Email delivery failed: {error_msg}"
 
 
-def send_rejection_notification(registration, force_resend=False):
+def _async_send_rejection_email(registration_id):
     """
-    Sends an automated rejection email to the student.
-    Prevents duplicate emails unless force_resend is explicitly True.
+    Background worker thread to deliver rejection email without blocking the web request.
     """
-    if registration.rejection_email_sent and not force_resend:
-        logger.info(f"Rejection email already sent for {registration.registration_id}. Skipping.")
-        return False, "Rejection email already sent previously."
+    from .models import Registration
+    try:
+        registration = Registration.objects.get(registration_id=registration_id)
+    except Registration.DoesNotExist:
+        logger.error(f"Registration {registration_id} not found for async rejection email.")
+        return
 
     site_settings = SiteSettings.load()
     college_name = site_settings.college_name or "Seshadripuram College"
@@ -115,7 +118,7 @@ def send_rejection_notification(registration, force_resend=False):
         f"{college_name}\n"
     )
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'chathuryasdc@gmail.com')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Chathurya Club <chathuryastudentdeveloperclub@gmail.com>')
 
     try:
         send_mail(
@@ -139,12 +142,11 @@ def send_rejection_notification(registration, force_resend=False):
             'notification_type',
             'notification_error'
         ])
-        logger.info(f"Rejection email successfully sent to {registration.email} ({registration.registration_id})")
-        return True, "Rejection email delivered successfully."
+        logger.info(f"Rejection email successfully delivered to {registration.email} ({registration.registration_id})")
 
     except Exception as e:
         error_msg = str(e)
-        logger.error(f"Failed to send rejection email to {registration.email}: {error_msg}")
+        logger.error(f"Failed to deliver rejection email to {registration.email}: {error_msg}")
         
         # Record failure without rolling back Rejected status
         registration.notification_status = 'Failed'
@@ -155,4 +157,41 @@ def send_rejection_notification(registration, force_resend=False):
             'notification_type',
             'notification_error'
         ])
-        return False, f"Email delivery failed: {error_msg}"
+
+
+def send_approval_notification(registration, force_resend=False):
+    """
+    Triggers approval notification email asynchronously in a background thread.
+    Prevents duplicate emails unless force_resend is True.
+    """
+    if registration.approval_email_sent and not force_resend:
+        logger.info(f"Approval email already sent for {registration.registration_id}. Skipping.")
+        return False, "Approval email already sent previously."
+
+    # Launch background thread for instant web UI response
+    thread = threading.Thread(
+        target=_async_send_approval_email,
+        args=(registration.registration_id,),
+        daemon=True
+    )
+    thread.start()
+    return True, "Approval notification queued and sending in background."
+
+
+def send_rejection_notification(registration, force_resend=False):
+    """
+    Triggers rejection notification email asynchronously in a background thread.
+    Prevents duplicate emails unless force_resend is True.
+    """
+    if registration.rejection_email_sent and not force_resend:
+        logger.info(f"Rejection email already sent for {registration.registration_id}. Skipping.")
+        return False, "Rejection email already sent previously."
+
+    # Launch background thread for instant web UI response
+    thread = threading.Thread(
+        target=_async_send_rejection_email,
+        args=(registration.registration_id,),
+        daemon=True
+    )
+    thread.start()
+    return True, "Rejection notification queued and sending in background."

@@ -239,7 +239,7 @@ def admin_update_registration_status_view(request, reg_id):
 def admin_registration_detail_view(request, reg_id):
     site_settings = SiteSettings.load()
     registration = get_object_or_404(Registration, registration_id=reg_id)
-
+    
     if request.method == 'POST':
         action = request.POST.get('action_type', '')
         if action == 'resend_email':
@@ -251,7 +251,7 @@ def admin_registration_detail_view(request, reg_id):
                 sent, msg = False, "Cannot send email for Pending status."
             
             if sent:
-                messages.success(request, f"Email notification resent successfully: {msg}")
+                messages.success(request, f"Email notification queued: {msg}")
             else:
                 messages.error(request, f"Resend email failed: {msg}")
             return redirect('admin_registration_detail', reg_id=registration.registration_id)
@@ -267,9 +267,6 @@ def admin_registration_detail_view(request, reg_id):
                 elif reg.status in ['Rejected', 'Cancelled']:
                     send_rejection_notification(reg)
             messages.success(request, f"Registration {registration.registration_id} updated successfully.")
-            return redirect('admin_registration_detail', reg_id=registration.registration_id)
-    else:
-        form = RegistrationAdminForm(instance=registration)
             return redirect('admin_registration_detail', reg_id=registration.registration_id)
     else:
         form = RegistrationAdminForm(instance=registration)
