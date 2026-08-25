@@ -1,0 +1,92 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <!-- Admin Navigation Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>Club Management Dashboard</h2>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'admin_registrations_list' %}" class="btn btn-secondary btn-sm">Registrations</a>
+        <a href="{% url 'admin_courses_list' %}" class="btn btn-secondary btn-sm">Courses</a>
+        <a href="{% url 'admin_events_list' %}" class="btn btn-secondary btn-sm">Previous Events</a>
+        <a href="{% url 'admin_settings_edit' %}" class="btn btn-secondary btn-sm">Site Settings</a>
+        <a href="{% url 'admin_logout' %}" class="btn btn-sm" style="background: #ff5f56; color: #fff;">Logout</a>
+      </div>
+    </div>
+
+    <!-- Statistics Cards Grid -->
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 3rem;">
+      <div class="stat-card">
+        <div class="stat-number" style="color: var(--accent);">{{ total_registrations }}</div>
+        <div class="stat-label">Total Registrations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: #3776ab;">{{ fullstack_count }}</div>
+        <div class="stat-label">Full Stack Registrations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" style="color: #ffd43b;">{{ data_analytics_count }}</div>
+        <div class="stat-label">Data Analytics Registrations</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ total_events }}</div>
+        <div class="stat-label">Previous Events</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ total_courses }}</div>
+        <div class="stat-label">Active Courses</div>
+      </div>
+    </div>
+
+    <!-- Recent Registrations Section -->
+    <div class="detail-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+        <h3>Recent Student Registrations</h3>
+        <a href="{% url 'admin_registrations_list' %}" class="btn btn-secondary btn-sm">View All Registrations →</a>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="confirmation-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-subtle); text-align: left; font-size: 0.9rem; color: var(--text-secondary);">
+              <th style="padding: 0.75rem;">ID</th>
+              <th style="padding: 0.75rem;">Student Name</th>
+              <th style="padding: 0.75rem;">College ID</th>
+              <th style="padding: 0.75rem;">Course</th>
+              <th style="padding: 0.75rem;">Stream</th>
+              <th style="padding: 0.75rem;">Status</th>
+              <th style="padding: 0.75rem;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reg in recent_registrations %}
+              <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 0.92rem;">
+                <td style="padding: 0.75rem;"><span class="badge">{{ reg.registration_id }}</span></td>
+                <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">{{ reg.full_name }}</td>
+                <td style="padding: 0.75rem;">{{ reg.college_id }}</td>
+                <td style="padding: 0.75rem; color: var(--accent); font-weight: 600;">{{ reg.course }}</td>
+                <td style="padding: 0.75rem;">{{ reg.stream }} ({{ reg.year_of_study }})</td>
+                <td style="padding: 0.75rem;"><span class="badge" style="background: {% if reg.status == 'Confirmed' %}var(--accent){% elif reg.status == 'Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">{{ reg.status }}</span></td>
+                <td style="padding: 0.75rem;"><a href="{% url 'admin_registration_detail' reg_id=reg.registration_id %}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Manage</a></td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No registrations received yet.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

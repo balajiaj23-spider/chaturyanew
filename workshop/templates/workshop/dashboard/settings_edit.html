@@ -1,0 +1,111 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Site Settings — Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>Edit Site Settings &amp; Branding</h2>
+      </div>
+      <div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Club Name</label>
+            {{ form.club_name }}
+          </div>
+          <div class="form-group">
+            <label>College Name</label>
+            {{ form.college_name }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Hero Title</label>
+          {{ form.hero_title }}
+        </div>
+
+        <div class="form-group">
+          <label>Hero Subtitle / Description</label>
+          {{ form.hero_subtitle }}
+        </div>
+
+        <div class="form-group">
+          <label>About Us Description</label>
+          {{ form.about_text }}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contact Email</label>
+            {{ form.contact_email }}
+          </div>
+          <div class="form-group">
+            <label>Contact Phone</label>
+            {{ form.contact_phone }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Address Information</label>
+          {{ form.address }}
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>LinkedIn URL</label>
+            {{ form.linkedin_url }}
+          </div>
+          <div class="form-group">
+            <label>GitHub URL</label>
+            {{ form.github_url }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Instagram URL</label>
+            {{ form.instagram_url }}
+          </div>
+          <div class="form-group">
+            <label>Facebook URL</label>
+            {{ form.facebook_url }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Footer Description</label>
+          {{ form.footer_text }}
+        </div>
+
+        <div class="form-group">
+          <label>Copyright Statement</label>
+          {{ form.copyright_text }}
+        </div>
+
+        <div class="form-group">
+          <label>Upload Club Logo</label>
+          {{ form.logo }}
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem;">Save Site Settings →</button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

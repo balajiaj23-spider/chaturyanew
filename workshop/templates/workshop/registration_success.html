@@ -1,0 +1,49 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Registration Successful — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+  <main class="registration-section">
+    <div class="container">
+      <div class="form-wrapper">
+        
+        <div id="registrationSuccessCard" class="success-card active" style="display: block;">
+          <div class="success-icon" style="font-size: 3.5rem; color: var(--accent); text-align: center; margin-bottom: 1rem;">✓</div>
+          <h2 style="text-align: center; font-size: 2rem; margin-bottom: 0.5rem;">Registration Successful!</h2>
+          <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem;">
+            Thank you for registering with <strong>{{ site_settings.club_name }}</strong>. Your workshop seat has been reserved!
+          </p>
+
+          <table class="confirmation-table" style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration ID</th><td style="padding: 0.75rem; text-align: right;"><span class="badge" style="font-weight: 700;">{{ registration.registration_id }}</span></td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Full Name</th><td style="padding: 0.75rem; text-align: right; font-weight: 600; color: var(--text-primary);">{{ registration.full_name }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">College ID Number</th><td style="padding: 0.75rem; text-align: right; font-weight: 600; color: var(--text-primary);">{{ registration.college_id }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Email Address</th><td style="padding: 0.75rem; text-align: right; color: var(--text-primary);">{{ registration.email }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Phone Number</th><td style="padding: 0.75rem; text-align: right; color: var(--text-primary);">{{ registration.phone }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Stream</th><td style="padding: 0.75rem; text-align: right; color: var(--text-primary);">{{ registration.stream }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Selected Workshop</th><td style="padding: 0.75rem; text-align: right; font-weight: 700; color: var(--accent);">{{ registration.course }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Year of Study</th><td style="padding: 0.75rem; text-align: right; color: var(--text-primary);">{{ registration.year_of_study }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Section</th><td style="padding: 0.75rem; text-align: right; color: var(--text-primary);">{{ registration.section }}</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Laptop Availability</th><td style="padding: 0.75rem; text-align: right; font-weight: 600; color: {% if registration.has_laptop == 'Yes' %}var(--accent){% else %}#ff5f56{% endif %};">{% if registration.has_laptop == 'Yes' %}✓ Yes (Laptop Available){% else %}✕ No Laptop{% endif %}</td></tr>
+              <tr><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Status</th><td style="padding: 0.75rem; text-align: right; font-weight: 600; color: var(--accent);">{{ registration.status }}</td></tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; gap: 1rem; justify-content: center;">
+            <a href="{% url 'home' %}" class="btn btn-primary">Back to Home</a>
+            <a href="{% url 'courses_list' %}" class="btn btn-secondary">Explore Courses</a>
+          </div>
+        </div>
+
+        <div class="institutional-info" style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem; color: var(--text-secondary);">
+          <p><strong>{{ site_settings.club_name }}</strong> | {{ site_settings.college_name }}</p>
+          <p>Address: {{ site_settings.address }}</p>
+          <p>Official Email: {{ site_settings.contact_email }} | Helpline: {{ site_settings.contact_phone }}</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+{% endblock %}

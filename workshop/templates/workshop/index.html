@@ -1,0 +1,165 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}{{ site_settings.club_name }} — Workshop Portal{% endblock %}
+
+{% block content %}
+  <!-- ==================== 1. HERO SECTION ==================== -->
+  <section id="home" class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="badge">
+            <span class="badge-dot"></span>
+            {{ site_settings.club_name }} 2026
+          </div>
+          <h1>{{ site_settings.hero_title }}</h1>
+          <p class="hero-subtitle">
+            {{ site_settings.hero_subtitle }}
+          </p>
+          <div class="hero-cta">
+            <a href="{% url 'courses_list' %}" class="btn btn-primary">View Course</a>
+            <a href="{% url 'registration' %}" class="btn btn-secondary">Register Now</a>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <img src="{% static 'images/hero-workshop.svg' %}" alt="{{ site_settings.club_name }} Coding Visual">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 2. ABOUT US SECTION ==================== -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <div class="badge" style="margin-bottom: 1rem;">
+            <span class="badge-dot"></span>
+            About Our Club
+          </div>
+          <h2>{{ site_settings.club_name }}</h2>
+          <p>{{ site_settings.about_text }}</p>
+          <p>Our club actively plans and conducts structured programs focused on student tech growth:</p>
+          <ul style="list-style: disc; padding-left: 1.25rem; color: var(--text-secondary); margin: 0.75rem 0 1.25rem 0; line-height: 1.8;">
+            <li><strong>Technical Workshops</strong>: Intensive hands-on bootcamps in Full Stack &amp; Data Analytics.</li>
+            <li><strong>Technical Events</strong>: Hackathons, coding competitions, and guest speaker sessions.</li>
+            <li><strong>Learning Activities</strong>: Peer code reviews, open-source sprints, and study circles.</li>
+            <li><strong>Hands-on Development Programs</strong>: Real-world capstone projects built from scratch.</li>
+          </ul>
+          <a href="{% url 'courses_list' %}" class="btn btn-secondary" style="margin-top: 0.5rem;">View Course Offerings →</a>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Active Student Members</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">20+</div>
+            <div class="stat-label">Events &amp; Bootcamps</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">Technical Workshops</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">95%</div>
+            <div class="stat-label">Project Completion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 3. PREVIOUS EVENTS SECTION ==================== -->
+  <section id="events" class="events-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Our Track Record
+        </div>
+        <h2>Previous Technical Events</h2>
+        <p>Explore recent workshops and practical bootcamps organized by {{ site_settings.club_name }}.</p>
+      </div>
+
+      <div class="events-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+        {% for event in previous_events %}
+          <article class="event-card">
+            <div class="event-img-wrapper">
+              {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.title }}">
+              {% elif event.image_path %}
+                <img src="{% static event.image_path %}" alt="{{ event.title }}">
+              {% else %}
+                <img src="{% static 'images/event-1.svg' %}" alt="{{ event.title }}">
+              {% endif %}
+              <span class="event-date-badge">{{ event.date_str }}</span>
+            </div>
+            <div class="event-body">
+              <h3>{{ event.title }}</h3>
+              <p>{{ event.description }}</p>
+            </div>
+          </article>
+        {% empty %}
+          <p style="color: var(--text-secondary); text-align: center;">No previous events configured.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 4. COURSES SECTION ==================== -->
+  <section id="courses" class="courses-preview-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Structured Workshop Programs
+        </div>
+        <h2>Available Technical Courses</h2>
+        <p>Join our upcoming hands-on workshops designed specifically for college students.</p>
+      </div>
+
+      <div class="courses-grid">
+        {% for course in courses %}
+          <article class="course-card" onclick="window.location.href='{% url 'course_detail' slug=course.slug %}'" style="cursor: pointer;">
+            <div class="course-banner">
+              {% if course.image %}
+                <img src="{{ course.image.url }}" alt="{{ course.title }}">
+              {% elif course.image_path %}
+                <img src="{% static course.image_path %}" alt="{{ course.title }}">
+              {% else %}
+                <img src="{% static 'images/fullstack.svg' %}" alt="{{ course.title }}">
+              {% endif %}
+            </div>
+            <div class="course-content">
+              <div class="badge" style="margin-bottom: 0.25rem;">{{ course.badge_text }}</div>
+              <h3>{{ course.title }}</h3>
+              <p>{{ course.short_description }}</p>
+              <div class="tech-tags">
+                {% for topic in course.topics.all %}
+                  <span class="tech-tag">{{ topic.section_title }}</span>
+                {% endfor %}
+              </div>
+              <div style="margin-top: 1.25rem;">
+                <a href="{% url 'course_detail' slug=course.slug %}" class="btn btn-primary btn-block" style="text-align: center;" onclick="event.stopPropagation();">View Full Course Details</a>
+              </div>
+            </div>
+          </article>
+        {% empty %}
+          <p style="color: var(--text-secondary); text-align: center;">No active courses available right now.</p>
+        {% endfor %}
+      </div>
+
+      <!-- Prominent Centered View Course Button -->
+      <div style="text-align: center; margin-top: 3rem;">
+        <a href="{% url 'courses_list' %}" class="btn btn-primary" style="padding: 1.1rem 2.5rem; font-size: 1.1rem;">
+          View Course →
+        </a>
+      </div>
+
+    </div>
+  </section>
+{% endblock %}

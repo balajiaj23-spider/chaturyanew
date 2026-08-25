@@ -1,0 +1,26 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # Frontend Public Routes
+    path('', views.home_view, name='home'),
+    path('courses/', views.courses_list_view, name='courses_list'),
+    path('courses/<slug:slug>/', views.course_detail_view, name='course_detail'),
+    path('register/', views.registration_view, name='registration'),
+    path('registration-success/<str:reg_id>/', views.registration_success_view, name='registration_success'),
+
+    # Custom Admin Authentication Routes
+    path('custom-admin/login/', views.admin_login_view, name='admin_login'),
+    path('custom-admin/logout/', views.admin_logout_view, name='admin_logout'),
+
+    # Custom Admin Dashboard Routes
+    path('custom-admin/', views.admin_dashboard_view, name='admin_dashboard'),
+    path('custom-admin/registrations/', views.admin_registrations_list_view, name='admin_registrations_list'),
+    path('custom-admin/registrations/<str:reg_id>/', views.admin_registration_detail_view, name='admin_registration_detail'),
+    path('custom-admin/courses/', views.admin_courses_list_view, name='admin_courses_list'),
+    path('custom-admin/courses/<int:course_id>/', views.admin_course_edit_view, name='admin_course_edit'),
+    path('custom-admin/events/', views.admin_events_list_view, name='admin_events_list'),
+    path('custom-admin/events/add/', views.admin_event_edit_view, name='admin_event_add'),
+    path('custom-admin/events/<int:event_id>/', views.admin_event_edit_view, name='admin_event_edit'),
+    path('custom-admin/settings/', views.admin_settings_edit_view, name='admin_settings_edit'),
+]

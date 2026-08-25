@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 350" width="100%" height="100%">
+  <defs>
+    <linearGradient id="fsBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141810" />
+      <stop offset="100%" stop-color="#111111" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="350" rx="16" fill="url(#fsBg)" stroke="#262626" stroke-width="2"/>
+  <!-- Decorative grid lines -->
+  <path d="M 0 70 L 600 70 M 0 140 L 600 140 M 0 210 L 600 210 M 0 280 L 600 280" stroke="#1f2419" stroke-width="1" stroke-dasharray="4,4"/>
+  <path d="M 120 0 L 120 350 M 240 0 L 240 350 M 360 0 L 360 350 M 480 0 L 480 350" stroke="#1f2419" stroke-width="1" stroke-dasharray="4,4"/>
+  
+  <!-- Central Browser mockup -->
+  <rect x="80" y="50" width="440" height="250" rx="12" fill="#181818" stroke="#b6ff00" stroke-width="1.5"/>
+  <rect x="80" y="50" width="440" height="35" rx="12" fill="#222222"/>
+  <rect x="80" y="73" width="440" height="12" fill="#222222"/>
+  <circle cx="102" cy="67" r="4" fill="#ff5f56"/>
+  <circle cx="116" cy="67" r="4" fill="#ffbd2e"/>
+  <circle cx="130" cy="67" r="4" fill="#27c93f"/>
+  <rect x="155" y="59" width="220" height="16" rx="8" fill="#141414"/>
+  <text x="170" y="71" font-family="sans-serif" font-size="10" fill="#a0a0a0">https://localhost:3000/app</text>
+
+  <!-- Frontend and Backend visual components inside -->
+  <rect x="105" y="105" width="180" height="175" rx="8" fill="#121212" stroke="#333333"/>
+  <text x="120" y="130" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#b6ff00">Frontend Layer</text>
+  <rect x="120" y="145" width="150" height="10" rx="4" fill="#333333"/>
+  <rect x="120" y="165" width="110" height="10" rx="4" fill="#262626"/>
+  <rect x="120" y="195" width="80" height="28" rx="6" fill="#b6ff00"/>
+  <text x="135" y="213" font-family="sans-serif" font-size="11" font-weight="700" fill="#111111">UI Components</text>
+
+  <rect x="315" y="105" width="180" height="175" rx="8" fill="#121212" stroke="#333333"/>
+  <text x="330" y="130" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#60a5fa">Backend &amp; DB</text>
+  <rect x="330" y="145" width="150" height="24" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="340" y="161" font-family="monospace" font-size="10" fill="#93c5fd">REST API Routes</text>
+  <rect x="330" y="180" width="150" height="24" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="340" y="196" font-family="monospace" font-size="10" fill="#93c5fd">SQL / NoSQL Database</text>
+  <rect x="330" y="215" width="150" height="24" rx="4" fill="#1e293b" stroke="#3b82f6" stroke-width="1"/>
+  <text x="340" y="231" font-family="monospace" font-size="10" fill="#93c5fd">Auth &amp; Session Tokens</text>
+</svg>

@@ -1,0 +1,47 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Manage Courses — Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>Manage Workshop Courses</h2>
+      </div>
+      <div>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="courses-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+      {% for course in courses %}
+        <article class="course-card">
+          <div class="course-banner">
+            {% if course.image %}
+              <img src="{{ course.image.url }}" alt="{{ course.title }}">
+            {% elif course.image_path %}
+              <img src="{% static course.image_path %}" alt="{{ course.title }}">
+            {% endif %}
+          </div>
+          <div class="course-content">
+            <div class="badge" style="margin-bottom: 0.25rem;">{{ course.badge_text }}</div>
+            <h2>{{ course.title }}</h2>
+            <p>{{ course.short_description }}</p>
+            <p><strong>Duration:</strong> {{ course.duration }}</p>
+            <p><strong>Status:</strong> {% if course.is_active %}<span class="badge" style="background: var(--accent); color: #000;">Active</span>{% else %}<span class="badge" style="background: #ff5f56; color: #fff;">Inactive</span>{% endif %}</p>
+
+            <div style="margin-top: 1.5rem;">
+              <a href="{% url 'admin_course_edit' course_id=course.id %}" class="btn btn-primary btn-block" style="text-align: center;">Edit Course Details &amp; Modules →</a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

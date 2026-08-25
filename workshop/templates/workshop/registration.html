@@ -1,0 +1,155 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Workshop Registration — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+  <main class="registration-section">
+    <div class="container">
+      
+      <div class="form-wrapper">
+        <div class="form-header">
+          <div class="badge" style="margin-bottom: 0.75rem;">
+            <span class="badge-dot"></span>
+            Student Registration Portal
+          </div>
+          <h1>Workshop Registration</h1>
+          <p>Register for the College Club Workshop</p>
+        </div>
+
+        {% if form.non_field_errors %}
+          <div class="badge" style="width: 100%; padding: 1rem; margin-bottom: 1.5rem; background: #ff5f56; color: #fff; font-weight: 600; text-align: center;">
+            {% for error in form.non_field_errors %}
+              <p style="margin: 0;">⚠️ {{ error }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Django Registration Form -->
+        <form method="POST" class="registration-form" novalidate>
+          {% csrf_token %}
+          
+          <!-- 1. Full Name -->
+          <div class="form-group">
+            <label for="{{ form.full_name.id_for_label }}">Full Name <span style="color: var(--accent);">*</span></label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}
+              <span class="error-message active">{{ form.full_name.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Form Row: College ID & Email -->
+          <div class="form-row">
+            <!-- 2. College ID Number -->
+            <div class="form-group">
+              <label for="{{ form.college_id.id_for_label }}">College ID Number <span style="color: var(--accent);">*</span></label>
+              {{ form.college_id }}
+              {% if form.college_id.errors %}
+                <span class="error-message active">{{ form.college_id.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+            <!-- 3. Email Address -->
+            <div class="form-group">
+              <label for="{{ form.email.id_for_label }}">Email Address <span style="color: var(--accent);">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <span class="error-message active">{{ form.email.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Form Row: Phone & Stream -->
+          <div class="form-row">
+            <!-- 4. Phone Number -->
+            <div class="form-group">
+              <label for="{{ form.phone.id_for_label }}">Phone Number <span style="color: var(--accent);">*</span></label>
+              {{ form.phone }}
+              {% if form.phone.errors %}
+                <span class="error-message active">{{ form.phone.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+            <!-- 5. Stream -->
+            <div class="form-group">
+              <label for="{{ form.stream.id_for_label }}">Stream <span style="color: var(--accent);">*</span></label>
+              {{ form.stream }}
+              {% if form.stream.errors %}
+                <span class="error-message active">{{ form.stream.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Form Row: Course & Year of Study -->
+          <div class="form-row">
+            <!-- 6. Course -->
+            <div class="form-group">
+              <label for="{{ form.course.id_for_label }}">Course <span style="color: var(--accent);">*</span></label>
+              {{ form.course }}
+              {% if form.course.errors %}
+                <span class="error-message active">{{ form.course.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+            <!-- 7. Year of Study -->
+            <div class="form-group">
+              <label for="{{ form.year_of_study.id_for_label }}">Year of Study <span style="color: var(--accent);">*</span></label>
+              {{ form.year_of_study }}
+              {% if form.year_of_study.errors %}
+                <span class="error-message active">{{ form.year_of_study.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Form Row: Section & Laptop Availability -->
+          <div class="form-row">
+            <!-- 8. Section -->
+            <div class="form-group">
+              <label for="{{ form.section.id_for_label }}">Section <span style="color: var(--accent);">*</span></label>
+              {{ form.section }}
+              {% if form.section.errors %}
+                <span class="error-message active">{{ form.section.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+            <!-- 9. Do you have a laptop? -->
+            <div class="form-group">
+              <label>Do you have a laptop? <span style="color: var(--accent);">*</span></label>
+              <div class="radio-group" style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                {% for radio in form.has_laptop %}
+                  <label class="radio-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    {{ radio.tag }}
+                    <span>{{ radio.choice_label }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+              {% if form.has_laptop.errors %}
+                <span class="error-message active">{{ form.has_laptop.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 1rem;">
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 1.1rem; font-size: 1.05rem;">
+              Register Now →
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Institutional Information Box -->
+        <div class="institutional-info" style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem; color: var(--text-secondary);">
+          <p><strong>{{ site_settings.club_name }}</strong> | {{ site_settings.college_name }}</p>
+          <p>Address: {{ site_settings.address }}</p>
+          <p>Official Email: {{ site_settings.contact_email }} | Helpline: {{ site_settings.contact_phone }}</p>
+          <p style="margin-top: 0.5rem;">
+            <em>"Conducted as part of the official student technical and learning activities of {{ site_settings.club_name }}."</em>
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+{% endblock %}

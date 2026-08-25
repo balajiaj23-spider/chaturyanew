@@ -1,0 +1,140 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}{{ course.title }} Workshop — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+  <!-- ==================== WORKSHOP HERO ==================== -->
+  <section class="course-detail-hero">
+    <div class="container">
+      <div class="badge" style="margin-bottom: 1rem;">
+        <span class="badge-dot"></span>
+        Chathurya Technical Workshop
+      </div>
+      <h1>{{ course.title }}</h1>
+      <p style="max-width: 680px; margin-top: 0.75rem; font-size: 1.15rem; color: var(--text-secondary);">
+        {{ course.detailed_description }}
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== WORKSHOP DETAILS MAIN ==================== -->
+  <section class="detail-section">
+    <div class="container">
+      <div class="detail-grid">
+        
+        <!-- Main Content Column -->
+        <div class="detail-main">
+          
+          <!-- Visual Banner Card -->
+          <div class="detail-card" style="padding: 0; overflow: hidden;">
+            {% if course.image %}
+              <img src="{{ course.image.url }}" alt="{{ course.title }}" style="width: 100%; height: auto;">
+            {% elif course.image_path %}
+              <img src="{% static course.image_path %}" alt="{{ course.title }}" style="width: 100%; height: auto;">
+            {% else %}
+              <img src="{% static 'images/data-analytics.svg' %}" alt="{{ course.title }}" style="width: 100%; height: auto;">
+            {% endif %}
+          </div>
+
+          <!-- About the Workshop -->
+          <div class="detail-card">
+            <h3>About The Workshop</h3>
+            <p style="margin-bottom: 1rem;">
+              The <strong>{{ course.title }} Workshop</strong> is organized by <strong>{{ site_settings.club_name }}</strong> to empower students to convert raw business data into actionable strategic insights.
+            </p>
+            <p>
+              In this {{ course.duration }} hands-on bootcamp, you will clean large real-world datasets, build relational data models, automate repetitive workflows using VBA macros, and build executive Tableau dashboards.
+            </p>
+          </div>
+
+          <!-- WHAT YOU WILL LEARN -->
+          <div class="detail-card">
+            <h3>WHAT YOU WILL LEARN</h3>
+            
+            <div class="curriculum-grid">
+              {% for topic in topics %}
+                <div class="curriculum-box">
+                  <h4>{{ topic.module_number }} – {{ topic.section_title }}</h4>
+                  <ul>
+                    {% for bullet in topic.get_bullets_list %}
+                      <li>{{ bullet }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- HANDS-ON PROJECTS -->
+          {% if projects %}
+            <div class="detail-card">
+              <h3>HANDS-ON PROJECTS</h3>
+              <ol style="padding-left: 1.25rem; color: var(--text-primary); line-height: 2; font-weight: 500;">
+                {% for project in projects %}
+                  <li>{{ project.title }}</li>
+                {% endfor %}
+              </ol>
+            </div>
+          {% endif %}
+
+          <!-- PRACTICAL CAPSTONE -->
+          {% if course.capstone_title %}
+            <div class="detail-card" style="border: 2px solid var(--accent); background: var(--bg-card);">
+              <div class="badge" style="margin-bottom: 0.5rem;">PRACTICAL CAPSTONE</div>
+              <h2 style="font-size: 1.6rem; color: var(--text-primary); margin-bottom: 0.5rem;">{{ course.capstone_title }}</h2>
+              <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+                {{ course.capstone_description }}
+              </p>
+
+              {% if course.capstone_tech_flow %}
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;">
+                  <span class="tech-tag" style="font-size: 0.95rem;">{{ course.capstone_tech_flow }}</span>
+                </div>
+              {% endif %}
+
+              <ul style="list-style: disc; padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.8;">
+                <li><strong>Learn by building</strong>: Interactive analytics exercises every single session.</li>
+                <li><strong>Practice with real data</strong>: Real business dataset transformations.</li>
+                <li><strong>Complete a real analytics project</strong>: Showcase a publication-ready Tableau BI dashboard.</li>
+              </ul>
+            </div>
+          {% endif %}
+
+        </div>
+
+        <!-- Sidebar Information Card -->
+        <aside class="detail-sidebar">
+          <div class="sidebar-card">
+            <h3>Workshop Information</h3>
+
+            <div class="info-item">
+              <span class="info-label">Duration</span>
+              <span class="info-value">{{ course.duration }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Who Can Attend</span>
+              <span class="info-value">{{ course.who_can_attend }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Requirements &amp; Prerequisites</span>
+              <p style="font-size: 0.9rem; color: var(--text-secondary);">{{ course.requirements }}</p>
+            </div>
+
+            <div class="info-item">
+              <span class="info-label">Certificate</span>
+              <span class="info-value" style="color: var(--accent);">Official Chathurya Certificate of Completion</span>
+            </div>
+
+            <a href="{% url 'registration' %}?course={{ course.slug }}" class="btn btn-primary btn-block" style="padding: 1.1rem; font-size: 1.1rem; text-align: center;">
+              Register Now →
+            </a>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+{% endblock %}

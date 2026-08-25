@@ -1,0 +1,61 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Courses Catalog — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+  <!-- ==================== COURSES HERO ==================== -->
+  <section class="course-detail-hero">
+    <div class="container text-center" style="text-align: center;">
+      <div class="badge" style="margin-bottom: 1rem;">
+        <span class="badge-dot"></span>
+        {{ site_settings.club_name }}
+      </div>
+      <h1>Workshop <span class="text-accent">Courses Catalog</span></h1>
+      <p style="max-width: 650px; margin: 0.75rem auto 0 auto; font-size: 1.1rem; color: var(--text-secondary);">
+        Explore our intensive technical workshops designed to build practical skills, real projects, and developer confidence.
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== COURSES CATALOG GRID ==================== -->
+  <section class="courses-preview-section" style="background: none; border: none; padding-top: 2rem; padding-bottom: 5rem;">
+    <div class="container">
+      <div class="courses-grid" style="grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));">
+        
+        {% for course in courses %}
+          <article class="course-card">
+            <div class="course-banner">
+              {% if course.image %}
+                <img src="{{ course.image.url }}" alt="{{ course.title }}">
+              {% elif course.image_path %}
+                <img src="{% static course.image_path %}" alt="{{ course.title }}">
+              {% else %}
+                <img src="{% static 'images/fullstack.svg' %}" alt="{{ course.title }}">
+              {% endif %}
+            </div>
+            <div class="course-content">
+              <div class="badge" style="margin-bottom: 0.25rem;">{{ course.badge_text }}</div>
+              <h2>{{ course.title }}</h2>
+              <p>{{ course.short_description }}</p>
+              
+              <h4 style="font-size: 0.95rem; color: var(--text-primary); margin-top: 1rem;">Core Topics &amp; Technologies:</h4>
+              <ul class="topics-list" style="line-height: 1.8;">
+                {% for topic in course.topics.all %}
+                  <li>{{ topic.section_title }}</li>
+                {% endfor %}
+              </ul>
+
+              <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <a href="{% url 'course_detail' slug=course.slug %}" class="btn btn-primary btn-block" style="text-align: center;">View Detailed Course</a>
+              </div>
+            </div>
+          </article>
+        {% empty %}
+          <p style="color: var(--text-secondary); text-align: center;">No active courses listed.</p>
+        {% endfor %}
+
+      </div>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Admin Login — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+  <main class="registration-section">
+    <div class="container">
+      <div class="form-wrapper" style="max-width: 450px; margin: 3rem auto;">
+        <div class="form-header text-center" style="text-align: center;">
+          <div class="badge" style="margin-bottom: 0.75rem;">
+            <span class="badge-dot"></span>
+            Staff Authentication
+          </div>
+          <h1>Admin Portal</h1>
+          <p>Login to manage registrations, courses &amp; events</p>
+        </div>
+
+        <form method="POST" class="registration-form">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="id_username">Username <span style="color: var(--accent);">*</span></label>
+            <input type="text" name="username" id="id_username" class="form-control" required placeholder="Admin username">
+          </div>
+
+          <div class="form-group">
+            <label for="id_password">Password <span style="color: var(--accent);">*</span></label>
+            <input type="password" name="password" id="id_password" class="form-control" required placeholder="••••••••">
+          </div>
+
+          <div style="margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 1.1rem;">
+              Log In to Dashboard →
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+{% endblock %}

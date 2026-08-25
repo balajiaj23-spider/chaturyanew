@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0e11"/>
+      <stop offset="100%" stop-color="#16181d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" rx="16" fill="url(#bgGrad)"/>
+  <rect x="20" y="20" width="760" height="410" rx="12" fill="none" stroke="#252830" stroke-width="2"/>
+  
+  <!-- Terminal Header -->
+  <rect x="50" y="50" width="700" height="40" rx="8" fill="#1b1e24"/>
+  <circle cx="80" cy="70" r="6" fill="#ff5f56"/>
+  <circle cx="100" cy="70" r="6" fill="#ffbd2e"/>
+  <circle cx="120" cy="70" r="6" fill="#27c93f"/>
+  <text x="400" y="75" fill="#8b949e" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="600" text-anchor="middle">CS50P — Harvard Python Workshop</text>
+  
+  <!-- Code Snippet Graphics -->
+  <rect x="50" y="100" width="700" height="300" rx="8" fill="#121418"/>
+  <text x="80" y="150" fill="#b6ff00" font-family="'Courier New', monospace" font-size="18" font-weight="bold">$ python cs50p_malan.py</text>
+  <text x="80" y="190" fill="#e6edf3" font-family="'Courier New', monospace" font-size="16">def main():</text>
+  <text x="120" y="220" fill="#e6edf3" font-family="'Courier New', monospace" font-size="16">name = input(<tspan fill="#a5d6ff">"What's your name? "</tspan>)</text>
+  <text x="120" y="250" fill="#e6edf3" font-family="'Courier New', monospace" font-size="16">print(hello(name))</text>
+  <text x="80" y="300" fill="#e6edf3" font-family="'Courier New', monospace" font-size="16">def hello(to=<tspan fill="#a5d6ff">"world"</tspan>):</text>
+  <text x="120" y="330" fill="#e6edf3" font-family="'Courier New', monospace" font-size="16">return f<tspan fill="#a5d6ff">"hello, {to}"</tspan></text>
+  
+  <!-- Python Badge -->
+  <rect x="560" y="130" width="160" height="150" rx="20" fill="#1b1e24" stroke="#3776ab" stroke-width="2"/>
+  <text x="640" y="200" fill="#3776ab" font-family="'Inter', system-ui, sans-serif" font-size="42" font-weight="800" text-anchor="middle">Py</text>
+  <text x="640" y="240" fill="#ffd43b" font-family="'Inter', system-ui, sans-serif" font-size="18" font-weight="700" text-anchor="middle">CS50P</text>
+</svg>

@@ -1,0 +1,51 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Manage Previous Events — Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 3rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>Manage Previous Events</h2>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <a href="{% url 'admin_event_add' %}" class="btn btn-primary btn-sm">+ Add New Previous Event</a>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+      </div>
+    </div>
+
+    <div class="events-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+      {% for event in events %}
+        <article class="event-card">
+          <div class="event-img-wrapper">
+            {% if event.image %}
+              <img src="{{ event.image.url }}" alt="{{ event.title }}">
+            {% elif event.image_path %}
+              <img src="{% static event.image_path %}" alt="{{ event.title }}">
+            {% else %}
+              <img src="{% static 'images/event-1.svg' %}" alt="{{ event.title }}">
+            {% endif %}
+            <span class="event-date-badge">{{ event.date_str }}</span>
+          </div>
+          <div class="event-body">
+            <h3>{{ event.title }}</h3>
+            <p>{{ event.description }}</p>
+            <p style="margin-top: 0.5rem;"><strong>Status:</strong> {% if event.is_active %}<span class="badge" style="background: var(--accent); color: #000;">Active</span>{% else %}<span class="badge" style="background: #ff5f56; color: #fff;">Disabled</span>{% endif %}</p>
+            
+            <div style="margin-top: 1rem;">
+              <a href="{% url 'admin_event_edit' event_id=event.id %}" class="btn btn-secondary btn-sm" style="padding: 0.5rem 1rem;">Edit Event →</a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <p style="color: var(--text-secondary); text-align: center;">No previous events configured.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

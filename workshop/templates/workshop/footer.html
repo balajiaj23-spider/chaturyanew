@@ -1,0 +1,48 @@
+{% load static %}
+<!-- ==================== COMMON FOOTER ==================== -->
+<footer id="contact" class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand">
+          {% if site_settings.logo %}
+            <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.club_name }} Logo">
+          {% else %}
+            <img src="{% static 'images/logo.svg' %}" alt="{{ site_settings.club_name }} Logo">
+          {% endif %}
+        </div>
+        <p>{{ site_settings.footer_text }}</p>
+        <div class="social-links">
+          {% if site_settings.linkedin_url %}<a href="{{ site_settings.linkedin_url }}" target="_blank" class="social-icon" aria-label="LinkedIn">in</a>{% endif %}
+          {% if site_settings.github_url %}<a href="{{ site_settings.github_url }}" target="_blank" class="social-icon" aria-label="GitHub">gh</a>{% endif %}
+          {% if site_settings.instagram_url %}<a href="{{ site_settings.instagram_url }}" target="_blank" class="social-icon" aria-label="Instagram">ig</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <div class="footer-links">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'home' %}#about">About Us</a>
+          <a href="{% url 'home' %}#events">Previous Events</a>
+          <a href="{% url 'courses_list' %}">Courses</a>
+          <a href="{% url 'registration' %}">Register</a>
+          <a href="{% url 'admin_login' %}">Admin Dashboard</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Contact &amp; Club Info</h4>
+        <p><strong>{{ site_settings.club_name }}</strong></p>
+        <p>{{ site_settings.address }}</p>
+        <p>Email: <a href="mailto:{{ site_settings.contact_email }}" style="color: var(--accent);">{{ site_settings.contact_email }}</a></p>
+        <p>Phone: {{ site_settings.contact_phone }}</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>{{ site_settings.copyright_text }}</p>
+      <p style="font-size: 0.8rem;">Conducted as part of the official student technical and learning activities of {{ site_settings.club_name }}.</p>
+    </div>
+  </div>
+</footer>
