@@ -61,8 +61,8 @@
           <select name="status" class="form-control" style="padding: 0.6rem;">
             <option value="">All Statuses</option>
             <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
-            <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved</option>
-            <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+            <option value="Approved" {% if status_filter == 'Approved' or status_filter == 'Confirmed' %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if status_filter == 'Rejected' or status_filter == 'Cancelled' %}selected{% endif %}>Rejected</option>
           </select>
         </div>
 
@@ -72,7 +72,7 @@
       </form>
     </div>
 
-    <!-- Registrations Table -->
+    <!-- Registrations Table (Original Layout) -->
     <div class="detail-card">
       <div style="overflow-x: auto;">
         <table class="confirmation-table" style="width: 100%; border-collapse: collapse;">
@@ -82,10 +82,11 @@
               <th style="padding: 0.75rem;">Student Name</th>
               <th style="padding: 0.75rem;">College ID</th>
               <th style="padding: 0.75rem;">Email</th>
+              <th style="padding: 0.75rem;">Phone</th>
               <th style="padding: 0.75rem;">Course</th>
               <th style="padding: 0.75rem;">Stream/Year/Sec</th>
+              <th style="padding: 0.75rem;">Laptop</th>
               <th style="padding: 0.75rem;">Status</th>
-              <th style="padding: 0.75rem;">Email Status</th>
               <th style="padding: 0.75rem;">Action</th>
             </tr>
           </thead>
@@ -96,29 +97,22 @@
                 <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">{{ reg.full_name }}</td>
                 <td style="padding: 0.75rem;">{{ reg.college_id }}</td>
                 <td style="padding: 0.75rem;">{{ reg.email }}</td>
+                <td style="padding: 0.75rem;">{{ reg.phone }}</td>
                 <td style="padding: 0.75rem; color: var(--accent); font-weight: 600;">{{ reg.course }}</td>
                 <td style="padding: 0.75rem;">{{ reg.stream }} / {{ reg.year_of_study }} / {{ reg.section }}</td>
+                <td style="padding: 0.75rem;">{% if reg.has_laptop == 'Yes' %}✓ Yes{% else %}✕ No{% endif %}</td>
                 <td style="padding: 0.75rem;">
                   <span class="badge" style="background: {% if reg.status in 'Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">
                     {{ reg.status }}
                   </span>
                 </td>
                 <td style="padding: 0.75rem;">
-                  {% if reg.notification_status == 'Sent' %}
-                    <span style="color: #28a745; font-weight: 700; font-size: 0.85rem;">✓ Sent</span>
-                  {% elif reg.notification_status == 'Failed' %}
-                    <span style="color: #dc3545; font-weight: 700; font-size: 0.85rem;" title="{{ reg.notification_error }}">✕ Failed</span>
-                  {% else %}
-                    <span style="color: var(--text-muted); font-size: 0.85rem;">Not Sent</span>
-                  {% endif %}
-                </td>
-                <td style="padding: 0.75rem;">
                   <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: nowrap;">
                     {% if reg.status != 'Approved' and reg.status != 'Confirmed' %}
                       <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
                         {% csrf_token %}
-                        <input type="hidden" name="status_action" value="approve">
-                        <button type="submit" class="btn btn-sm" style="background: #28a745; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Approve Student Registration & Send Email Notification">✓ Approve</button>
+                        <input type="hidden" name="status_action" value="accept">
+                        <button type="submit" class="btn btn-sm" style="background: #28a745; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Accept Registration">✓ Accept</button>
                       </form>
                     {% endif %}
 
@@ -126,7 +120,7 @@
                       <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
                         {% csrf_token %}
                         <input type="hidden" name="status_action" value="reject">
-                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Reject Student Registration & Send Email Notification">✕ Reject</button>
+                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Reject Registration">✕ Reject</button>
                       </form>
                     {% endif %}
 
@@ -136,7 +130,7 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="9" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No registrations match your search filters.</td>
+                <td colspan="10" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No registrations match your search filters.</td>
               </tr>
             {% endfor %}
           </tbody>
