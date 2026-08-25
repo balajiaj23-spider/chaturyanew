@@ -30,19 +30,45 @@
       </a>
     </div>
 
-    <!-- DAY SELECTOR PILLS -->
+    <!-- DAY SELECTOR PILLS & COMPLETION STATUS -->
     <div class="detail-card" style="margin-bottom: 2rem; padding: 1.25rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Select Workshop Session Day:</h4>
-          <span style="font-size: 0.85rem; color: var(--text-secondary);">Currently Marking: <strong>{{ selected_course }} — Day {{ selected_day }} of 15</strong></span>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h4 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Select Workshop Session Day:</h4>
+            {% if is_current_day_completed %}
+              <span class="badge" style="background: #28a745; color: #fff; font-weight: 700; font-size: 0.8rem;">✓ Day {{ selected_day }} Completed</span>
+            {% else %}
+              <span class="badge" style="background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-subtle); font-size: 0.8rem;">In Progress</span>
+            {% endif %}
+          </div>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem; display: block;">Currently Marking: <strong>{{ selected_course }} — Day {{ selected_day }} of 15</strong></span>
         </div>
-        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-          {% for d in days_range %}
-            <a href="?course={{ selected_course }}&day={{ d }}" class="btn btn-sm {% if selected_day == d %}btn-primary{% else %}btn-secondary{% endif %}" style="min-width: 38px; text-align: center; font-weight: 700; padding: 0.4rem 0.6rem;">
-              D{{ d }}
-            </a>
-          {% endfor %}
+        
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+          <!-- Day Completion Action Form -->
+          <form method="POST" style="margin: 0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_day_completion">
+            {% if is_current_day_completed %}
+              <button type="submit" class="btn btn-secondary btn-sm" style="font-weight: 700; border-color: #28a745; color: #28a745;" title="Click to re-open Day {{ selected_day }}">
+                ✓ Day {{ selected_day }} Completed (Click to Re-open)
+              </button>
+            {% else %}
+              <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;" title="Mark Day {{ selected_day }} as finished and completed">
+                ✓ Mark Day {{ selected_day }} as Completed
+              </button>
+            {% endif %}
+          </form>
+
+          <!-- Session Day Pills -->
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            {% for item in days_info %}
+              <a href="?course={{ selected_course }}&day={{ item.day }}" class="btn btn-sm {% if selected_day == item.day %}btn-primary{% else %}btn-secondary{% endif %}" style="min-width: 42px; text-align: center; font-weight: 700; padding: 0.4rem 0.6rem; {% if item.is_completed %}border-color: #28a745;{% endif %}">
+                D{{ item.day }}{% if item.is_completed %} ✓{% endif %}
+              </a>
+            {% endfor %}
+          </div>
         </div>
       </div>
     </div>
@@ -337,11 +363,19 @@
 
     banner.style.display = "block";
     if (data.success) {
-      banner.style.borderColor = "#28a745";
-      banner.style.background = "rgba(40, 167, 69, 0.1)";
-      title.style.color = "#28a745";
-      title.textContent = "✓ " + data.full_name + " (" + data.college_id + ")";
-      msg.textContent = data.message + " Total Present: " + data.total_present_today;
+      if (data.already_marked) {
+        banner.style.borderColor = "#ffc107";
+        banner.style.background = "rgba(255, 193, 7, 0.15)";
+        title.style.color = "#ffc107";
+        title.textContent = "⚠️ Already Marked Present: " + data.full_name;
+        msg.textContent = data.message + " (Total Present: " + data.total_present_today + ")";
+      } else {
+        banner.style.borderColor = "#28a745";
+        banner.style.background = "rgba(40, 167, 69, 0.1)";
+        title.style.color = "#28a745";
+        title.textContent = "✓ " + data.full_name + " (" + data.college_id + ")";
+        msg.textContent = data.message + " Total Present Today: " + data.total_present_today;
+      }
     } else {
       banner.style.borderColor = "#ff5f56";
       banner.style.background = "rgba(255, 95, 86, 0.1)";

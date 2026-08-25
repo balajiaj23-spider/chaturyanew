@@ -202,3 +202,19 @@ class AttendanceRecord(models.Model):
     def __str__(self):
         status = "Present" if self.is_present else "Absent"
         return f"Day {self.session_day} - {self.registration.full_name}: {status}"
+
+
+class SessionDayStatus(models.Model):
+    course_name = models.CharField(max_length=100)
+    session_day = models.IntegerField(default=1)
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('course_name', 'session_day')
+        ordering = ['session_day']
+
+    def __str__(self):
+        status = "Completed" if self.is_completed else "In Progress"
+        return f"{self.course_name} - Day {self.session_day}: {status}"
+

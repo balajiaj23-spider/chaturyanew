@@ -70,14 +70,14 @@
                 {% endfor %}
 
                 <td style="padding: 0.6rem; font-weight: 700;">{{ item.present_count }}/15</td>
-                <td style="padding: 0.6rem; font-weight: 700; color: {% if item.percentage >= 80 %}var(--accent){% else %}#ff5f56{% endif %};">
+                <td style="padding: 0.6rem; font-weight: 700; color: {% if item.percentage >= 50 %}var(--accent){% else %}#ff5f56{% endif %};">
                   {{ item.percentage }}%
                 </td>
                 <td style="padding: 0.6rem;">
                   {% if item.eligible %}
                     <span class="badge" style="background: var(--accent); color: #000; font-weight: 700;">✓ Eligible</span>
                   {% else %}
-                    <span class="badge" style="background: rgba(255,95,86,0.2); color: #ff5f56;">Needs 80%</span>
+                    <span class="badge" style="background: rgba(255,95,86,0.2); color: #ff5f56;">Needs 50%</span>
                   {% endif %}
                 </td>
               </tr>
