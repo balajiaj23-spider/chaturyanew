@@ -1,11 +1,36 @@
 import logging
 import threading
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection
 from django.conf import settings
 from django.utils import timezone
 from .models import SiteSettings
 
 logger = logging.getLogger(__name__)
+
+def _get_smtp_connection():
+    """
+    Returns an explicit SMTP connection forcing Port 465 (SSL) for cloud hosting providers
+    like Render where outbound Port 587 (TLS) connections are blocked or throttled.
+    """
+    user = getattr(settings, 'EMAIL_HOST_USER', '')
+    pwd = getattr(settings, 'EMAIL_HOST_PASSWORD', '')
+    host = getattr(settings, 'EMAIL_HOST', 'smtp.gmail.com') or 'smtp.gmail.com'
+    
+    # Always enforce Port 465 (SSL) for Gmail or default cloud outbound connections
+    port = 465
+    use_ssl = True
+    use_tls = False
+
+    return get_connection(
+        backend='django.core.mail.backends.smtp.EmailBackend',
+        host=host,
+        port=port,
+        username=user,
+        password=pwd,
+        use_ssl=use_ssl,
+        use_tls=use_tls,
+        timeout=30
+    )
 
 def _async_send_approval_email(registration_id):
     """
@@ -45,12 +70,14 @@ def _async_send_approval_email(registration_id):
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Chathurya Club <chathuryastudentdeveloperclub@gmail.com>')
 
     try:
+        conn = _get_smtp_connection()
         send_mail(
             subject=subject,
             message=body,
             from_email=from_email,
             recipient_list=[registration.email],
             fail_silently=False,
+            connection=conn
         )
         
         # Update tracking fields on success
@@ -121,12 +148,14 @@ def _async_send_rejection_email(registration_id):
     from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Chathurya Club <chathuryastudentdeveloperclub@gmail.com>')
 
     try:
+        conn = _get_smtp_connection()
         send_mail(
             subject=subject,
             message=body,
             from_email=from_email,
             recipient_list=[registration.email],
             fail_silently=False,
+            connection=conn
         )
         
         # Update tracking fields on success
