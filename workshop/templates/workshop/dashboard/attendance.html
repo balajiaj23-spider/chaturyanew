@@ -211,16 +211,23 @@
   function stopCamera() {
     isScanning = false;
     if (videoStream) {
-      videoStream.getTracks().forEach(track => {
-        try {
-          track.stop();
-        } catch(e) {}
-      });
+      try {
+        const tracks = videoStream.getTracks();
+        tracks.forEach(track => {
+          try {
+            track.stop();
+            track.enabled = false;
+          } catch(e) {}
+        });
+      } catch(e) {}
       videoStream = null;
     }
     const video = document.getElementById('scannerVideo');
     if (video) {
-      video.srcObject = null;
+      try {
+        video.pause();
+        video.srcObject = null;
+      } catch(e) {}
     }
     const badge = document.getElementById('cameraStatusBadge');
     if (badge) {
@@ -261,21 +268,27 @@
       });
     }
 
-    // Try ideal environment camera first, then fall back to any video device
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } })
-      .then(handleStreamSuccess)
-      .catch(function(err1) {
-        console.warn("Rear camera request failed, attempting fallback camera...", err1);
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then(handleStreamSuccess)
-          .catch(function(err2) {
-            console.error("Camera access error:", err2);
-            badge.textContent = "Camera Error";
-            badge.style.background = "#ff5f56";
-            badge.style.color = "#fff";
-            alert("Camera Access Error: " + (err2.message || "Could not start camera source. Please check camera permissions and close any other application using the camera."));
-          });
-      });
+    // Wrap in slight delay to ensure hardware locks are released by browser
+    setTimeout(() => {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } })
+        .then(handleStreamSuccess)
+        .catch(function(err1) {
+          console.warn("Rear camera request failed, attempting fallback camera...", err1);
+          navigator.mediaDevices.getUserMedia({ video: true })
+            .then(handleStreamSuccess)
+            .catch(function(err2) {
+              console.error("Camera access error:", err2);
+              badge.textContent = "Camera Error";
+              badge.style.background = "#ff5f56";
+              badge.style.color = "#fff";
+              if (err2.name === "NotAllowedError" || err2.name === "PermissionDeniedError") {
+                alert("Camera Access Error: Permission denied. Please grant camera permission in your browser address bar.");
+              } else {
+                alert("Camera Access Error: " + (err2.message || "Could not start camera source. Please check camera permissions and close any other application using the camera."));
+              }
+            });
+        });
+    }, 100);
   }
 
   function scanFrame() {
@@ -390,9 +403,21 @@
     checkboxes.forEach(c => c.checked = val);
   }
 
-  // Auto-start camera when page loads and release on unload
+  // Auto-start camera when page loads and release on unload/visibility change
   document.addEventListener("DOMContentLoaded", function() {
-    startCamera();
+    setTimeout(startCamera, 200);
+  });
+  window.addEventListener("pageshow", function(e) {
+    if (e.persisted) {
+      setTimeout(startCamera, 200);
+    }
+  });
+  document.addEventListener("visibilitychange", function() {
+    if (document.hidden) {
+      stopCamera();
+    } else {
+      setTimeout(startCamera, 200);
+    }
   });
   window.addEventListener("beforeunload", stopCamera);
   window.addEventListener("pagehide", stopCamera);

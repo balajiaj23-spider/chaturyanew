@@ -194,33 +194,50 @@ def admin_registrations_list_view(request):
 from .emails import send_approval_notification, send_rejection_notification
 
 
+from django.http import JsonResponse
+
 @user_passes_test(is_staff_user, login_url='admin_login')
 def admin_update_registration_status_view(request, reg_id):
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('is_ajax') == 'true' or 'application/json' in request.META.get('HTTP_ACCEPT', '')
+    
     if request.method == 'POST':
         registration = get_object_or_404(Registration, registration_id=reg_id)
         status_action = request.POST.get('status_action', '').lower()
         
+        email_sent = False
+        email_msg = ""
+
         if status_action in ['accept', 'approve']:
             registration.status = 'Accepted'
             registration.save()
-            send_approval_notification(registration)
+            email_sent, email_msg = send_approval_notification(registration)
             messages.success(request, f"Registration {registration.registration_id} for {registration.full_name} accepted.")
 
         elif status_action in ['reject', 'cancel']:
             registration.status = 'Rejected'
             registration.save()
-            send_rejection_notification(registration)
+            email_sent, email_msg = send_rejection_notification(registration)
             messages.warning(request, f"Registration {registration.registration_id} for {registration.full_name} rejected.")
 
         elif status_action == 'resend_email':
             if registration.status in ['Accepted', 'Approved', 'Confirmed']:
-                send_approval_notification(registration, force_resend=True)
+                email_sent, email_msg = send_approval_notification(registration, force_resend=True)
                 messages.success(request, f"Notification email resent for {registration.registration_id}.")
             elif registration.status in ['Rejected', 'Cancelled']:
-                send_rejection_notification(registration, force_resend=True)
+                email_sent, email_msg = send_rejection_notification(registration, force_resend=True)
                 messages.success(request, f"Notification email resent for {registration.registration_id}.")
             else:
+                email_sent, email_msg = False, "Cannot send notification email for a Pending registration."
                 messages.error(request, "Cannot send notification email for a Pending registration.")
+
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'registration_id': registration.registration_id,
+                'status': registration.status,
+                'email_sent': email_sent,
+                'email_message': email_msg or "Mail Sent"
+            })
     
     # Strictly validate referer to NEVER redirect to /register/ or external URLs
     referer = request.META.get('HTTP_REFERER', '')

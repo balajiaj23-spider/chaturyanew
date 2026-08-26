@@ -140,4 +140,88 @@
 
   </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('form[action*="/status/"]').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Processing...';
+      }
+
+      const formData = new FormData(form);
+      formData.append('is_ajax', 'true');
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          const row = form.closest('tr');
+          if (row) {
+            // Update row status badge
+            const badge = row.querySelector('.badge');
+            if (badge) {
+              badge.textContent = data.status;
+              if (data.status === 'Accepted' || data.status === 'Approved' || data.status === 'Confirmed') {
+                badge.style.background = 'var(--accent)';
+                badge.style.color = '#000';
+              } else if (data.status === 'Rejected' || data.status === 'Cancelled') {
+                badge.style.background = '#ff5f56';
+                badge.style.color = '#fff';
+              }
+            }
+
+            // Update action area with Mail Sent confirmation
+            const actionCell = form.closest('td');
+            if (actionCell) {
+              let mailBadge = actionCell.querySelector('.mail-sent-badge');
+              if (!mailBadge) {
+                mailBadge = document.createElement('span');
+                mailBadge.className = 'badge mail-sent-badge';
+                mailBadge.style.display = 'inline-block';
+                mailBadge.style.padding = '0.3rem 0.6rem';
+                mailBadge.style.fontSize = '0.78rem';
+                mailBadge.style.fontWeight = '700';
+                mailBadge.style.borderRadius = '4px';
+                mailBadge.style.marginLeft = '0.4rem';
+                actionCell.appendChild(mailBadge);
+              }
+              if (data.email_sent) {
+                mailBadge.style.background = '#28a745';
+                mailBadge.style.color = '#fff';
+                mailBadge.textContent = '✓ Mail Sent';
+              } else {
+                mailBadge.style.background = '#ffc107';
+                mailBadge.style.color = '#000';
+                mailBadge.textContent = '⚠️ ' + (data.email_message || 'Status Updated');
+              }
+            }
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Status update AJAX error:', err);
+      })
+      .finally(() => {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      });
+    });
+  });
+});
+</script>
 {% endblock %}
