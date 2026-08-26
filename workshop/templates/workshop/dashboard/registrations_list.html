@@ -74,57 +74,68 @@
 
     <!-- Registrations Table (Original Layout) -->
     <div class="detail-card">
-      <div style="overflow-x: auto;">
-        <table class="confirmation-table" style="width: 100%; border-collapse: collapse;">
+      <div style="width: 100%; max-width: 100%; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch;">
+        <table class="confirmation-table" style="width: 100%; min-width: 1250px; border-collapse: collapse; margin: 0;">
           <thead>
             <tr style="border-bottom: 2px solid var(--border-subtle); text-align: left; font-size: 0.9rem; color: var(--text-secondary);">
-              <th style="padding: 0.75rem;">Reg ID</th>
-              <th style="padding: 0.75rem;">Student Name</th>
-              <th style="padding: 0.75rem;">College ID</th>
-              <th style="padding: 0.75rem;">Email</th>
-              <th style="padding: 0.75rem;">Phone</th>
-              <th style="padding: 0.75rem;">Course</th>
-              <th style="padding: 0.75rem;">Stream/Year/Sec</th>
-              <th style="padding: 0.75rem;">Laptop</th>
-              <th style="padding: 0.75rem;">Status</th>
-              <th style="padding: 0.75rem;">Action</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Reg ID</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Student Name</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">College ID</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Email</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Phone</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Course</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Stream/Year/Sec</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Laptop</th>
+              <th style="padding: 0.75rem; white-space: nowrap;">Status</th>
+              <th style="padding: 0.75rem 1rem; min-width: 380px; white-space: nowrap;">Action</th>
             </tr>
           </thead>
           <tbody>
             {% for reg in registrations %}
               <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 0.9rem;">
-                <td style="padding: 0.75rem;"><span class="badge">{{ reg.registration_id }}</span></td>
-                <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">{{ reg.full_name }}</td>
-                <td style="padding: 0.75rem;">{{ reg.college_id }}</td>
-                <td style="padding: 0.75rem;">{{ reg.email }}</td>
-                <td style="padding: 0.75rem;">{{ reg.phone }}</td>
-                <td style="padding: 0.75rem; color: var(--accent); font-weight: 600;">{{ reg.course }}</td>
-                <td style="padding: 0.75rem;">{{ reg.stream }} / {{ reg.year_of_study }} / {{ reg.section }}</td>
-                <td style="padding: 0.75rem;">{% if reg.has_laptop == 'Yes' %}✓ Yes{% else %}✕ No{% endif %}</td>
-                <td style="padding: 0.75rem;">
+                <td style="padding: 0.75rem; white-space: nowrap;"><span class="badge">{{ reg.registration_id }}</span></td>
+                <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">{{ reg.full_name }}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.college_id }}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.email }}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.phone }}</td>
+                <td style="padding: 0.75rem; color: var(--accent); font-weight: 600; white-space: nowrap;">{{ reg.course }}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.stream }} / {{ reg.year_of_study }} / {{ reg.section }}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">{% if reg.has_laptop == 'Yes' %}✓ Yes{% else %}✕ No{% endif %}</td>
+                <td style="padding: 0.75rem; white-space: nowrap;">
                   <span class="badge" style="background: {% if reg.status in 'Accepted Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">
                     {{ reg.status }}
                   </span>
                 </td>
-                <td style="padding: 0.75rem;">
-                  <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: nowrap;">
+                <td style="padding: 0.75rem 1rem; min-width: 380px; white-space: nowrap;">
+                  <div style="display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 0.45rem; white-space: nowrap;">
                     {% if reg.status != 'Accepted' and reg.status != 'Approved' and reg.status != 'Confirmed' %}
-                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
+                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline-block; margin: 0; white-space: nowrap;">
                         {% csrf_token %}
                         <input type="hidden" name="status_action" value="accept">
-                        <button type="submit" class="btn btn-sm" style="background: #28a745; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Accept Registration">✓ Accept</button>
+                        <button type="submit" class="btn btn-sm" style="background: #28a745; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;" title="Accept Registration">✓ Accept</button>
                       </form>
                     {% endif %}
 
                     {% if reg.status != 'Rejected' and reg.status != 'Cancelled' %}
-                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
+                      <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline-block; margin: 0; white-space: nowrap;">
                         {% csrf_token %}
                         <input type="hidden" name="status_action" value="reject">
-                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer;" title="Reject Registration">✕ Reject</button>
+                        <button type="submit" class="btn btn-sm" style="background: #dc3545; color: #fff; padding: 0.3rem 0.6rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;" title="Reject Registration">✕ Reject</button>
                       </form>
                     {% endif %}
 
-                    <a href="{% url 'admin_registration_detail' reg_id=reg.registration_id %}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Manage</a>
+                    <a href="{% url 'admin_registration_detail' reg_id=reg.registration_id %}" class="btn btn-secondary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; white-space: nowrap;">Manage</a>
+
+                    <form method="POST" action="{% url 'admin_delete_registration' reg_id=reg.registration_id %}" style="display: inline-block; margin: 0; white-space: nowrap;" onsubmit="return confirm('Are you sure you want to permanently delete the registration record for {{ reg.full_name|escapejs }} ({{ reg.registration_id }})? This action cannot be undone.');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm" style="background: #6c757d; color: #fff; padding: 0.3rem 0.55rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;" title="Delete Registration">🗑️ Delete</button>
+                    </form>
+
+                    {% if reg.approval_email_sent or reg.rejection_email_sent or reg.notification_status == 'Sent' %}
+                      <span class="badge mail-sent-badge" style="background: #28a745; color: #fff; padding: 0.3rem 0.55rem; font-size: 0.75rem; font-weight: 700; border-radius: 4px; display: inline-block; white-space: nowrap;">✓ Email Sent: Yes</span>
+                    {% else %}
+                      <span class="badge mail-sent-badge" style="background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 0.3rem 0.55rem; font-size: 0.75rem; border-radius: 4px; display: inline-block; white-space: nowrap;">Email Sent: No</span>
+                    {% endif %}
                   </div>
                 </td>
               </tr>
@@ -142,6 +153,21 @@
 </section>
 
 <script>
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('form[action*="/status/"]').forEach(function(form) {
     form.addEventListener('submit', function(e) {
@@ -158,10 +184,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = new FormData(form);
       formData.append('is_ajax', 'true');
 
+      const csrfToken = getCookie('csrftoken') || (form.querySelector('[name=csrfmiddlewaretoken]') ? form.querySelector('[name=csrfmiddlewaretoken]').value : '');
+
       fetch(form.action, {
         method: 'POST',
         headers: {
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrfToken
         },
         body: formData
       })

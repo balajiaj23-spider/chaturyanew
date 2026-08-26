@@ -180,6 +180,8 @@ class Registration(models.Model):
         ordering = ['-registration_date']
 
     def save(self, *args, **kwargs):
+        if self.college_id:
+            self.college_id = self.college_id.strip().upper()
         if not self.registration_id:
             self.registration_id = f"REG-{uuid.uuid4().hex[:6].upper()}"
         super().save(*args, **kwargs)

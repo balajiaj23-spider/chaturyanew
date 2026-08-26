@@ -145,6 +145,8 @@ def admin_dashboard_view(request):
     total_registrations = Registration.objects.count()
     fullstack_count = Registration.objects.filter(course='Full Stack Development').count()
     analytics_count = Registration.objects.filter(course='Data Analytics').count()
+    total_events = PreviousEvent.objects.count()
+    total_courses = Course.objects.count()
     recent_registrations = Registration.objects.all()[:10]
 
     context = {
@@ -152,6 +154,8 @@ def admin_dashboard_view(request):
         'total_registrations': total_registrations,
         'fullstack_count': fullstack_count,
         'analytics_count': analytics_count,
+        'total_events': total_events,
+        'total_courses': total_courses,
         'recent_registrations': recent_registrations,
     }
     return render(request, 'workshop/dashboard/dashboard.html', context)
@@ -240,6 +244,20 @@ def admin_update_registration_status_view(request, reg_id):
             })
     
     # Strictly validate referer to NEVER redirect to /register/ or external URLs
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and '/custom-admin/' in referer and '/register/' not in referer:
+        return redirect(referer)
+    return redirect('admin_dashboard')
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_delete_registration_view(request, reg_id):
+    if request.method == 'POST':
+        registration = get_object_or_404(Registration, registration_id=reg_id)
+        student_name = registration.full_name
+        registration.delete()
+        messages.success(request, f"Registration {reg_id} for {student_name} deleted successfully.")
+    
     referer = request.META.get('HTTP_REFERER', '')
     if referer and '/custom-admin/' in referer and '/register/' not in referer:
         return redirect(referer)

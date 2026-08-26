@@ -18,6 +18,7 @@ urlpatterns = [
     path('custom-admin/registrations/', views.admin_registrations_list_view, name='admin_registrations_list'),
     path('custom-admin/registrations/<str:reg_id>/', views.admin_registration_detail_view, name='admin_registration_detail'),
     path('custom-admin/registrations/<str:reg_id>/status/', views.admin_update_registration_status_view, name='admin_update_status'),
+    path('custom-admin/registrations/<str:reg_id>/delete/', views.admin_delete_registration_view, name='admin_delete_registration'),
     path('custom-admin/courses/', views.admin_courses_list_view, name='admin_courses_list'),
     path('custom-admin/courses/<int:course_id>/', views.admin_course_edit_view, name='admin_course_edit'),
     path('custom-admin/events/', views.admin_events_list_view, name='admin_events_list'),

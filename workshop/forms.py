@@ -11,14 +11,14 @@ class RegistrationForm(forms.ModelForm):
         ]
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Rahul Sharma', 'id': 'fullName'}),
-            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 24CA001', 'id': 'idCardNumber'}),
+            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 24CA001', 'id': 'idCardNumber', 'style': 'text-transform: uppercase;', 'oninput': 'this.value = this.value.toUpperCase();'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'rahul.sharma@gmail.com', 'id': 'email'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 9876543210', 'maxlength': '10', 'id': 'phone'}),
             'stream': forms.Select(attrs={'class': 'form-control', 'id': 'stream'}),
             'course': forms.Select(attrs={'class': 'form-control', 'id': 'course'}),
             'year_of_study': forms.Select(attrs={'class': 'form-control', 'id': 'className'}),
             'section': forms.Select(attrs={'class': 'form-control', 'id': 'section'}),
-            'has_laptop': forms.Select(attrs={'class': 'form-control', 'id': 'hasLaptop'}),
+            'has_laptop': forms.Select(attrs={'class': 'form-control', 'id': 'hasLaptop'}, choices=[('Yes', 'Yes'), ('No', 'No')]),
         }
 
     def clean_full_name(self):
@@ -28,7 +28,7 @@ class RegistrationForm(forms.ModelForm):
         return name
 
     def clean_college_id(self):
-        college_id = self.cleaned_data.get('college_id', '').strip()
+        college_id = self.cleaned_data.get('college_id', '').strip().upper()
         if not re.match(r'^[a-zA-Z0-9-]{3,15}$', college_id):
             raise forms.ValidationError("Please enter a valid College ID Number (e.g. 24CA000).")
         return college_id
@@ -143,3 +143,7 @@ class RegistrationAdminForm(forms.ModelForm):
             'has_laptop': forms.Select(attrs={'class': 'form-control'}, choices=[('Yes', 'Yes'), ('No', 'No')]),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def clean_college_id(self):
+        college_id = self.cleaned_data.get('college_id', '').strip().upper()
+        return college_id
