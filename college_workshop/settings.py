@@ -2,6 +2,12 @@ import os
 from pathlib import Path
 import dj_database_url
 
+try:
+    import dotenv
+    dotenv.load_dotenv()
+except ImportError:
+    pass
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-chathurya-student-developers-club-secret-key-2026')
