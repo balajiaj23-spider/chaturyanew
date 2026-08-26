@@ -1,7 +1,10 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
 from . import views
 
 urlpatterns = [
+    path('favicon.ico', RedirectView.as_view(url=staticfiles_storage.url('images/logo.svg'))),
     # Frontend Public Routes
     path('', views.home_view, name='home'),
     path('courses/', views.courses_list_view, name='courses_list'),

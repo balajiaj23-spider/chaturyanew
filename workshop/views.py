@@ -39,19 +39,35 @@ def courses_list_view(request):
 
 def course_detail_view(request, slug):
     site_settings = SiteSettings.load()
-    course = get_object_or_404(Course, slug=slug, is_active=True)
+    slug_clean = slug.lower().strip()
     
-    # Custom template fallback if fullstack/data-analytics legacy exists
-    if slug == 'fullstack-development':
-        return render(request, 'workshop/fullstack.html', {'site_settings': site_settings, 'course': course})
-    elif slug == 'data-analytics':
-        return render(request, 'workshop/data_analytics.html', {'site_settings': site_settings, 'course': course})
+    if slug_clean in ['fullstack', 'fullstack-development']:
+        course = Course.objects.filter(Q(slug__iexact='fullstack') | Q(slug__iexact='fullstack-development'), is_active=True).first()
+        if not course:
+            course = get_object_or_404(Course, is_active=True, title__icontains='Full Stack')
+    elif slug_clean in ['data-analytics', 'analytics']:
+        course = Course.objects.filter(Q(slug__iexact='data-analytics') | Q(slug__iexact='analytics'), is_active=True).first()
+        if not course:
+            course = get_object_or_404(Course, is_active=True, title__icontains='Analytics')
+    else:
+        course = get_object_or_404(Course, slug=slug, is_active=True)
+
+    topics = course.topics.all()
+    projects = course.projects.all()
 
     context = {
         'site_settings': site_settings,
         'course': course,
+        'topics': topics,
+        'projects': projects,
     }
-    return render(request, 'workshop/courses.html', context)
+
+    if slug_clean in ['fullstack', 'fullstack-development'] or 'full stack' in course.title.lower():
+        return render(request, 'workshop/fullstack.html', context)
+    elif slug_clean in ['data-analytics', 'analytics'] or 'data analytics' in course.title.lower():
+        return render(request, 'workshop/data_analytics.html', context)
+
+    return render(request, 'workshop/fullstack.html', context)
 
 
 def registration_view(request):
