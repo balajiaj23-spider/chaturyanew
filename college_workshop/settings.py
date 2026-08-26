@@ -1,6 +1,23 @@
 import os
+import socket
 from pathlib import Path
 import dj_database_url
+
+# Force socket DNS resolution to prefer IPv4 (AF_INET) over IPv6 (AF_INET6)
+# Fixes '[Errno 101] Network is unreachable' on cloud containers like Render where IPv6 egress is disabled.
+_orig_getaddrinfo = socket.getaddrinfo
+
+def _ipv4_first_getaddrinfo(*args, **kwargs):
+    try:
+        res = _orig_getaddrinfo(*args, **kwargs)
+        ipv4_res = [item for item in res if item[0] == socket.AF_INET]
+        if ipv4_res:
+            return ipv4_res
+        return res
+    except Exception:
+        return _orig_getaddrinfo(*args, **kwargs)
+
+socket.getaddrinfo = _ipv4_first_getaddrinfo
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
