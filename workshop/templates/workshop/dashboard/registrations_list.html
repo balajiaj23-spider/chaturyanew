@@ -205,32 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 badge.style.color = '#fff';
               }
             }
-
-            // Update action area with Mail Sent confirmation
-            const actionCell = form.closest('td');
-            if (actionCell) {
-              let mailBadge = actionCell.querySelector('.mail-sent-badge');
-              if (!mailBadge) {
-                mailBadge = document.createElement('span');
-                mailBadge.className = 'badge mail-sent-badge';
-                mailBadge.style.display = 'inline-block';
-                mailBadge.style.padding = '0.3rem 0.6rem';
-                mailBadge.style.fontSize = '0.78rem';
-                mailBadge.style.fontWeight = '700';
-                mailBadge.style.borderRadius = '4px';
-                mailBadge.style.marginLeft = '0.4rem';
-                actionCell.appendChild(mailBadge);
-              }
-              if (data.email_sent) {
-                mailBadge.style.background = '#28a745';
-                mailBadge.style.color = '#fff';
-                mailBadge.textContent = '✓ Mail Sent';
-              } else {
-                mailBadge.style.background = '#ffc107';
-                mailBadge.style.color = '#000';
-                mailBadge.textContent = '⚠️ ' + (data.email_message || 'Status Updated');
-              }
-            }
           }
         }
       })

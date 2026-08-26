@@ -100,12 +100,6 @@
                       {% csrf_token %}
                       <button type="submit" class="btn btn-sm" style="background: #6c757d; color: #fff; padding: 0.3rem 0.55rem; font-size: 0.78rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;" title="Delete Registration">🗑️ Delete</button>
                     </form>
-
-                    {% if reg.approval_email_sent or reg.rejection_email_sent or reg.notification_status == 'Sent' %}
-                      <span class="badge mail-sent-badge" style="background: #28a745; color: #fff; padding: 0.3rem 0.55rem; font-size: 0.75rem; font-weight: 700; border-radius: 4px; display: inline-block; white-space: nowrap;">✓ Email Sent: Yes</span>
-                    {% else %}
-                      <span class="badge mail-sent-badge" style="background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border-subtle); padding: 0.3rem 0.55rem; font-size: 0.75rem; border-radius: 4px; display: inline-block; white-space: nowrap;">Email Sent: No</span>
-                    {% endif %}
                   </div>
                 </td>
               </tr>
@@ -179,32 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
               } else if (data.status === 'Rejected' || data.status === 'Cancelled') {
                 badge.style.background = '#ff5f56';
                 badge.style.color = '#fff';
-              }
-            }
-
-            // Update action area with Mail Sent confirmation
-            const actionCell = form.closest('td');
-            if (actionCell) {
-              let mailBadge = actionCell.querySelector('.mail-sent-badge');
-              if (!mailBadge) {
-                mailBadge = document.createElement('span');
-                mailBadge.className = 'badge mail-sent-badge';
-                mailBadge.style.display = 'inline-block';
-                mailBadge.style.padding = '0.3rem 0.6rem';
-                mailBadge.style.fontSize = '0.78rem';
-                mailBadge.style.fontWeight = '700';
-                mailBadge.style.borderRadius = '4px';
-                mailBadge.style.marginLeft = '0.4rem';
-                actionCell.appendChild(mailBadge);
-              }
-              if (data.email_sent) {
-                mailBadge.style.background = '#28a745';
-                mailBadge.style.color = '#fff';
-                mailBadge.textContent = '✓ Mail Sent';
-              } else {
-                mailBadge.style.background = '#ffc107';
-                mailBadge.style.color = '#000';
-                mailBadge.textContent = '⚠️ ' + (data.email_message || 'Status Updated');
               }
             }
           }
