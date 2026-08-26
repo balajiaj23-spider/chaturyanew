@@ -140,6 +140,7 @@ class Registration(models.Model):
 
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
+        ('Accepted', 'Accepted'),
         ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
         ('Confirmed', 'Confirmed'),

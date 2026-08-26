@@ -201,38 +201,32 @@ def admin_update_registration_status_view(request, reg_id):
         status_action = request.POST.get('status_action', '').lower()
         
         if status_action in ['accept', 'approve']:
-            registration.status = 'Approved'
+            registration.status = 'Accepted'
             registration.save()
-            sent, msg = send_approval_notification(registration)
-            if sent:
-                messages.success(request, f"Registration {registration.registration_id} approved. {msg}")
-            else:
-                messages.warning(request, f"Registration {registration.registration_id} approved, but notification email status: {msg}")
+            send_approval_notification(registration)
+            messages.success(request, f"Registration {registration.registration_id} for {registration.full_name} accepted.")
 
         elif status_action in ['reject', 'cancel']:
             registration.status = 'Rejected'
             registration.save()
-            sent, msg = send_rejection_notification(registration)
-            if sent:
-                messages.success(request, f"Registration {registration.registration_id} rejected. {msg}")
-            else:
-                messages.warning(request, f"Registration {registration.registration_id} rejected, but notification email status: {msg}")
+            send_rejection_notification(registration)
+            messages.warning(request, f"Registration {registration.registration_id} for {registration.full_name} rejected.")
 
         elif status_action == 'resend_email':
-            if registration.status in ['Approved', 'Confirmed']:
-                sent, msg = send_approval_notification(registration, force_resend=True)
+            if registration.status in ['Accepted', 'Approved', 'Confirmed']:
+                send_approval_notification(registration, force_resend=True)
+                messages.success(request, f"Notification email resent for {registration.registration_id}.")
             elif registration.status in ['Rejected', 'Cancelled']:
-                sent, msg = send_rejection_notification(registration, force_resend=True)
+                send_rejection_notification(registration, force_resend=True)
+                messages.success(request, f"Notification email resent for {registration.registration_id}.")
             else:
-                sent, msg = False, "Cannot send notification email for a Pending registration."
-            
-            if sent:
-                messages.success(request, f"Notification email resent for {registration.registration_id}. {msg}")
-            else:
-                messages.error(request, f"Resend email failed: {msg}")
+                messages.error(request, "Cannot send notification email for a Pending registration.")
     
-    redirect_url = request.META.get('HTTP_REFERER', 'admin_dashboard')
-    return redirect(redirect_url)
+    # Strictly validate referer to NEVER redirect to /register/ or external URLs
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and '/custom-admin/' in referer and '/register/' not in referer:
+        return redirect(referer)
+    return redirect('admin_dashboard')
 
 
 @user_passes_test(is_staff_user, login_url='admin_login')
@@ -243,7 +237,7 @@ def admin_registration_detail_view(request, reg_id):
     if request.method == 'POST':
         action = request.POST.get('action_type', '')
         if action == 'resend_email':
-            if registration.status in ['Approved', 'Confirmed']:
+            if registration.status in ['Accepted', 'Approved', 'Confirmed']:
                 sent, msg = send_approval_notification(registration, force_resend=True)
             elif registration.status in ['Rejected', 'Cancelled']:
                 sent, msg = send_rejection_notification(registration, force_resend=True)
@@ -260,9 +254,9 @@ def admin_registration_detail_view(request, reg_id):
         old_status = registration.status
         if form.is_valid():
             reg = form.save()
-            # Trigger email if status changed to Approved or Rejected
+            # Trigger email if status changed to Accepted, Approved or Rejected
             if old_status != reg.status:
-                if reg.status in ['Approved', 'Confirmed']:
+                if reg.status in ['Accepted', 'Approved', 'Confirmed']:
                     send_approval_notification(reg)
                 elif reg.status in ['Rejected', 'Cancelled']:
                     send_rejection_notification(reg)
@@ -278,17 +272,6 @@ def admin_registration_detail_view(request, reg_id):
     }
     return render(request, 'workshop/dashboard/registration_detail.html', context)
 
-
-@user_passes_test(is_staff_user, login_url='admin_login')
-def admin_update_registration_status_view(request, reg_id):
-    registration = get_object_or_404(Registration, registration_id=reg_id)
-    if request.method == 'POST':
-        new_status = request.POST.get('status')
-        if new_status in dict(Registration.STATUS_CHOICES):
-            registration.status = new_status
-            registration.save()
-            messages.success(request, f"Status updated to {new_status} for {registration.full_name}.")
-    return redirect('admin_registrations_list')
 
 
 @user_passes_test(is_staff_user, login_url='admin_login')

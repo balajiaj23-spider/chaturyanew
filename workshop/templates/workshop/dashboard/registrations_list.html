@@ -102,13 +102,13 @@
                 <td style="padding: 0.75rem;">{{ reg.stream }} / {{ reg.year_of_study }} / {{ reg.section }}</td>
                 <td style="padding: 0.75rem;">{% if reg.has_laptop == 'Yes' %}✓ Yes{% else %}✕ No{% endif %}</td>
                 <td style="padding: 0.75rem;">
-                  <span class="badge" style="background: {% if reg.status in 'Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">
+                  <span class="badge" style="background: {% if reg.status in 'Accepted Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">
                     {{ reg.status }}
                   </span>
                 </td>
                 <td style="padding: 0.75rem;">
                   <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: nowrap;">
-                    {% if reg.status != 'Approved' and reg.status != 'Confirmed' %}
+                    {% if reg.status != 'Accepted' and reg.status != 'Approved' and reg.status != 'Confirmed' %}
                       <form method="POST" action="{% url 'admin_update_status' reg_id=reg.registration_id %}" style="display: inline; margin: 0;">
                         {% csrf_token %}
                         <input type="hidden" name="status_action" value="accept">
