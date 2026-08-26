@@ -12,7 +12,8 @@
         <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
         <h2>Edit Site Settings &amp; Branding</h2>
       </div>
-      <div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="{% url 'admin_change_credentials' %}" class="btn btn-secondary btn-sm">🔑 Change Credentials</a>
         <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
       </div>
     </div>

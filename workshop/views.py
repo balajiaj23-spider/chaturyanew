@@ -1,12 +1,13 @@
 import csv
 import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.models import User
 from .models import SiteSettings, PreviousEvent, Course, CourseTopic, CourseProject, Registration, AttendanceRecord, SessionDayStatus
 from .forms import RegistrationForm, SiteSettingsForm, CourseForm, CourseTopicForm, PreviousEventForm, RegistrationAdminForm
 
@@ -153,6 +154,50 @@ def admin_logout_view(request):
     logout(request)
     messages.info(request, "You have been logged out.")
     return redirect('admin_login')
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_change_credentials_view(request):
+    site_settings = SiteSettings.load()
+    user = request.user
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password', '').strip()
+        new_username = request.POST.get('new_username', '').strip()
+        new_password = request.POST.get('new_password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+
+        if not user.check_password(current_password):
+            messages.error(request, "Current password is incorrect.")
+        elif new_password and new_password != confirm_password:
+            messages.error(request, "New password and confirmation password do not match.")
+        elif new_password and len(new_password) < 6:
+            messages.error(request, "New password must be at least 6 characters.")
+        else:
+            updated = False
+            if new_username and new_username != user.username:
+                if User.objects.filter(username=new_username).exclude(pk=user.pk).exists():
+                    messages.error(request, f"Username '{new_username}' is already taken.")
+                    return redirect('admin_change_credentials')
+                user.username = new_username
+                updated = True
+
+            if new_password:
+                user.set_password(new_password)
+                updated = True
+
+            if updated:
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Admin credentials updated successfully!")
+                return redirect('admin_dashboard')
+            else:
+                messages.info(request, "No changes made to credentials.")
+
+    context = {
+        'site_settings': site_settings,
+    }
+    return render(request, 'workshop/dashboard/change_credentials.html', context)
 
 
 @user_passes_test(is_staff_user, login_url='admin_login')

@@ -28,6 +28,7 @@ urlpatterns = [
     path('custom-admin/events/add/', views.admin_event_edit_view, name='admin_event_add'),
     path('custom-admin/events/<int:event_id>/', views.admin_event_edit_view, name='admin_event_edit'),
     path('custom-admin/settings/', views.admin_settings_edit_view, name='admin_settings_edit'),
+    path('custom-admin/change-credentials/', views.admin_change_credentials_view, name='admin_change_credentials'),
 
     # Attendance & Computer Vision Routes
     path('custom-admin/attendance/', views.admin_attendance_view, name='admin_attendance'),
