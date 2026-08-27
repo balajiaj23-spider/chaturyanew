@@ -112,8 +112,11 @@ function initSmoothScroll() {
           });
 
           // Update active link class manually
-          document.querySelectorAll('.nav-link').forEach(link => {
-            if (link.getAttribute('href') === href || link.getAttribute('href') === targetId) {
+          const targetSection = targetId.replace('#', '');
+          document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(link => {
+            const linkHref = link.getAttribute('href') || '';
+            const linkNav = link.getAttribute('data-nav') || '';
+            if (linkNav === targetSection || linkHref === href || linkHref === targetId || linkHref.endsWith(targetId)) {
               link.classList.add('active');
             } else {
               link.classList.remove('active');
@@ -130,31 +133,48 @@ function initSmoothScroll() {
  */
 function initScrollSpy() {
   const sections = document.querySelectorAll('section[id], main section[id]');
-  const navLinks = document.querySelectorAll('.nav-menu .nav-link');
+  const allNavItems = document.querySelectorAll('.nav-menu .nav-link, .mobile-floating-nav .mobile-nav-item');
 
-  if (sections.length === 0 || navLinks.length === 0) return;
+  if (sections.length === 0 || allNavItems.length === 0) return;
 
-  window.addEventListener('scroll', () => {
-    let currentSectionId = '';
-    const scrollPosition = window.pageYOffset + 120;
+  function updateActiveState() {
+    const pathname = window.location.pathname;
+    const isHomePage = pathname === '/' || pathname.endsWith('index.html') || pathname === '';
+    if (!isHomePage) return;
 
-    sections.forEach(section => {
-      const sectionTop = section.offsetTop;
-      const sectionHeight = section.offsetHeight;
+    let currentSectionId = 'home';
+    const hash = window.location.hash.replace('#', '');
+    if (hash && ['about', 'events', 'courses'].includes(hash) && window.pageYOffset < 100) {
+      currentSectionId = hash;
+    } else {
+      const scrollPosition = window.pageYOffset + 140;
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute('id');
 
-      if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-        currentSectionId = section.getAttribute('id');
-      }
-    });
-
-    if (currentSectionId) {
-      navLinks.forEach(link => {
-        link.classList.remove('active');
-        const href = link.getAttribute('href');
-        if (href && (href.endsWith('#' + currentSectionId) || href === '#' + currentSectionId)) {
-          link.classList.add('active');
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          if (['home', 'about', 'events', 'courses'].includes(sectionId)) {
+            currentSectionId = sectionId;
+          }
         }
       });
     }
-  });
+
+    allNavItems.forEach(link => {
+      link.classList.remove('active');
+      const dataNav = link.getAttribute('data-nav');
+      const href = link.getAttribute('href') || '';
+
+      if (dataNav === currentSectionId) {
+        link.classList.add('active');
+      } else if (!dataNav && (href.endsWith('#' + currentSectionId) || (currentSectionId === 'home' && (href === '/' || href.endsWith('/'))))) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', updateActiveState);
+  window.addEventListener('load', updateActiveState);
+  updateActiveState();
 }
