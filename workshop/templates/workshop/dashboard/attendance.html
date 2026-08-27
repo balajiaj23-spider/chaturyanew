@@ -21,11 +21,11 @@
     </div>
 
     <!-- COURSE SEPARATION TABS -->
-    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-subtle);">
-      <a href="?course=Full Stack Development&day={{ selected_day }}" class="btn {% if selected_course == 'Full Stack Development' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-subtle); max-width: 100%; box-sizing: border-box;">
+      <a href="?course=Full Stack Development&day={{ selected_day }}" class="btn {% if selected_course == 'Full Stack Development' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.25rem; font-weight: 700; max-width: 100%; box-sizing: border-box;">
         💻 Full Stack Development
       </a>
-      <a href="?course=Data Analytics&day={{ selected_day }}" class="btn {% if selected_course == 'Data Analytics' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.5rem; font-weight: 700;">
+      <a href="?course=Data Analytics&day={{ selected_day }}" class="btn {% if selected_course == 'Data Analytics' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.8rem 1.25rem; font-weight: 700; max-width: 100%; box-sizing: border-box;">
         📊 Data Analytics
       </a>
     </div>
@@ -73,11 +73,11 @@
       </div>
     </div>
 
-    <div class="detail-grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div style="display: flex; flex-direction: column; gap: 2rem;">
       
-      <!-- LEFT COLUMN: COMPUTER VISION CAMERA SCANNER -->
+      <!-- COMPUTER VISION CAMERA SCANNER -->
       <div>
-        <div class="detail-card" style="position: sticky; top: 90px;">
+        <div class="detail-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h3 style="margin: 0; font-size: 1.15rem;">📷 Live Camera QR Scanner</h3>
             <span id="cameraStatusBadge" class="badge" style="background: var(--accent); color: #000; font-weight: 700;">Camera Ready</span>
@@ -117,7 +117,7 @@
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: ENROLLED STUDENTS ROSTER CHECKLIST -->
+      <!-- ENROLLED STUDENTS ROSTER CHECKLIST (BELOW CAMERA SCANNER) -->
       <div>
         <div class="detail-card">
           <form method="POST" id="bulkAttendanceForm">
