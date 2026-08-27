@@ -5,11 +5,11 @@ def sync_admin_credentials(sender, **kwargs):
     from django.contrib.auth.models import User
     try:
         # Automatically clean up old default admin users on deployment
-        User.objects.filter(username__in=['admin', 'Admin', 'admin_test']).delete()
+        User.objects.filter(username__in=['admin', 'Admin', 'admin_test', 'chathuryasdc']).delete()
 
-        # Guarantee chathuryasdc user is created with updated credentials
-        user, created = User.objects.get_or_create(username='chathuryasdc')
-        user.set_password('balajinaveen@26')
+        # Guarantee chathurya user is created with updated credentials
+        user, created = User.objects.get_or_create(username='chathurya')
+        user.set_password('ucanneverguess')
         user.is_staff = True
         user.is_superuser = True
         user.email = 'chathuryastudentdeveloperclub@gmail.com'
