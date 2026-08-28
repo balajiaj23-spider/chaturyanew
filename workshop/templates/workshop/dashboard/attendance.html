@@ -194,19 +194,25 @@
   const currentDay = {{ selected_day }};
   const scanApiUrl = "{% url 'admin_attendance_scan_api' %}";
 
-  // Audio Beep Chime Synthesizer
+  // Audio Beep Chime Synthesizer (reusable instance for 2+ hour continuous sessions)
+  let sharedAudioCtx = null;
   function playSuccessChime() {
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
+      if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+        sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (sharedAudioCtx.state === 'suspended') {
+        sharedAudioCtx.resume();
+      }
+      const osc = sharedAudioCtx.createOscillator();
+      const gain = sharedAudioCtx.createGain();
       osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, sharedAudioCtx.currentTime); // A5 note
+      gain.gain.setValueAtTime(0.15, sharedAudioCtx.currentTime);
       osc.connect(gain);
-      gain.connect(ctx.destination);
+      gain.connect(sharedAudioCtx.destination);
       osc.start();
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(sharedAudioCtx.currentTime + 0.15);
     } catch(e) {}
   }
 
@@ -414,12 +420,20 @@
     if (isProcessingApiRequest) return;
     isProcessingApiRequest = true;
 
+    function getCsrfToken() {
+      if (typeof getCookie === 'function') {
+        const tok = getCookie('csrftoken');
+        if (tok) return tok;
+      }
+      return "{{ csrf_token }}";
+    }
+
     // Send AJAX POST to Scan API
     fetch(scanApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": "{{ csrf_token }}"
+        "X-CSRFToken": getCsrfToken()
       },
       body: JSON.stringify({
         qr_payload: payload,

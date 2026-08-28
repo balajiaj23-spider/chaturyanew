@@ -76,7 +76,7 @@
                 <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.college_id }}</td>
                 <td style="padding: 0.75rem; color: var(--accent); font-weight: 600; white-space: nowrap;">{{ reg.course }}</td>
                 <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.stream }} ({{ reg.year_of_study }})</td>
-                <td style="padding: 0.75rem; white-space: nowrap;"><span class="badge" style="background: {% if reg.status in 'Accepted Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">{{ reg.status }}</span></td>
+                <td style="padding: 0.75rem; white-space: nowrap;"><span class="badge status-badge" style="background: {% if reg.status in 'Accepted Approved Confirmed' %}var(--accent){% elif reg.status in 'Rejected Cancelled' %}#ff5f56{% else %}#ffd43b{% endif %}; color: #000;">{{ reg.status }}</span></td>
                 <td style="padding: 0.75rem 1rem; min-width: 380px; white-space: nowrap;">
                   <div style="display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 0.45rem; white-space: nowrap;">
                     {% if reg.status != 'Accepted' and reg.status != 'Approved' and reg.status != 'Confirmed' %}
@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
       e.stopPropagation();
 
       const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn ? btn.innerHTML : '';
       if (btn) {
         btn.disabled = true;
         btn.innerHTML = 'Processing...';
@@ -162,31 +161,12 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          const row = form.closest('tr');
-          if (row) {
-            // Update row status badge
-            const badge = row.querySelector('.badge');
-            if (badge) {
-              badge.textContent = data.status;
-              if (data.status === 'Accepted' || data.status === 'Approved' || data.status === 'Confirmed') {
-                badge.style.background = 'var(--accent)';
-                badge.style.color = '#000';
-              } else if (data.status === 'Rejected' || data.status === 'Cancelled') {
-                badge.style.background = '#ff5f56';
-                badge.style.color = '#fff';
-              }
-            }
-          }
+          window.location.reload();
         }
       })
       .catch(err => {
-        console.error('Status update AJAX error:', err);
-      })
-      .finally(() => {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-        }
+        console.error('Status update error:', err);
+        window.location.reload();
       });
     });
   });

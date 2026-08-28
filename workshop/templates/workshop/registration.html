@@ -17,10 +17,24 @@
           <p>Register for the College Club Workshop</p>
         </div>
 
+        {% if is_slot_full %}
+          <!-- Slot Full Capacity Card -->
+          <div style="background: rgba(20, 20, 30, 0.85); border: 1px solid var(--accent, #8a2be2); border-radius: 16px; padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; box-shadow: 0 8px 32px rgba(138, 43, 226, 0.2);">
+            <div style="font-size: 3.5rem; margin-bottom: 1rem;">🚫</div>
+            <h2 style="color: #fff; margin-bottom: 0.75rem; font-size: 1.8rem;">Slot Not Available At This Moment</h2>
+            <p style="color: var(--text-secondary, #aaa); max-width: 520px; margin: 0 auto 1.5rem; line-height: 1.6; font-size: 1.05rem;">
+              We have reached our maximum capacity of <strong style="color: var(--accent, #a855f7);">180 registered students</strong> for the upcoming workshops. Registrations are currently closed.
+            </p>
+            <a href="{% url 'home' %}" class="btn btn-secondary btn-sm" style="padding: 0.7rem 1.5rem; font-weight: 600;">← Return to Homepage</a>
+          </div>
+        {% else %}
+
         {% if form.non_field_errors %}
-          <div class="badge" style="width: 100%; padding: 1rem; margin-bottom: 1.5rem; background: #ff5f56; color: #fff; font-weight: 600; text-align: center;">
+          <div style="width: 100%; padding: 1.1rem 1.5rem; margin-bottom: 1.5rem; background: rgba(138, 43, 226, 0.12); border: 1px solid var(--accent, #a855f7); border-radius: 10px; color: var(--text-primary, #fff); font-weight: 600; text-align: center; box-shadow: 0 4px 20px rgba(138, 43, 226, 0.15);">
             {% for error in form.non_field_errors %}
-              <p style="margin: 0;">⚠️ {{ error }}</p>
+              <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem;">
+                <span style="color: var(--accent, #a855f7);">⚠️</span> {{ error }}
+              </p>
             {% endfor %}
           </div>
         {% endif %}
@@ -130,6 +144,7 @@
           </div>
 
         </form>
+        {% endif %}
 
         <!-- Institutional Information Box -->
         <div class="institutional-info" style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); font-size: 0.88rem; color: var(--text-secondary); text-align: center;">
@@ -152,4 +167,55 @@
 
     </div>
   </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('.registration-form');
+      const idInput = document.getElementById('idCardNumber');
+
+      if (idInput) {
+        function validateCollegeId(showPopup = false) {
+          const val = idInput.value.trim();
+          if (val && /^[a-zA-Z]/.test(val)) {
+            let errSpan = idInput.parentNode.querySelector('.client-error-msg');
+            if (!errSpan) {
+              errSpan = document.createElement('span');
+              errSpan.className = 'error-message active client-error-msg';
+              errSpan.style.color = '#ff5f56';
+              errSpan.style.display = 'block';
+              errSpan.style.marginTop = '0.3rem';
+              idInput.parentNode.appendChild(errSpan);
+            }
+            errSpan.textContent = '⚠️ College ID always starts with a number (e.g. 250CB024)';
+            
+            if (showPopup) {
+              alert('⚠️ College ID always starts with a number (e.g. 250CB024)');
+            }
+            return false;
+          } else {
+            const errSpan = idInput.parentNode.querySelector('.client-error-msg');
+            if (errSpan) errSpan.remove();
+            return true;
+          }
+        }
+
+        idInput.addEventListener('blur', function() {
+          validateCollegeId(true);
+        });
+
+        idInput.addEventListener('input', function() {
+          validateCollegeId(false);
+        });
+
+        if (form) {
+          form.addEventListener('submit', function(e) {
+            if (!validateCollegeId(true)) {
+              e.preventDefault();
+              idInput.focus();
+            }
+          });
+        }
+      }
+    });
+  </script>
 {% endblock %}

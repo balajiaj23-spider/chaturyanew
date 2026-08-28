@@ -75,6 +75,9 @@ def registration_view(request):
     site_settings = SiteSettings.load()
     selected_course_param = request.GET.get('course', '')
     
+    total_registrations = Registration.objects.count()
+    is_slot_full = total_registrations >= 180
+
     initial_data = {}
     if selected_course_param.lower() in ['fullstack', 'fullstack-development', 'full stack development']:
         initial_data['course'] = 'Full Stack Development'
@@ -82,23 +85,63 @@ def registration_view(request):
         initial_data['course'] = 'Data Analytics'
 
     if request.method == 'POST':
+        if is_slot_full:
+            messages.error(request, "Slot not available at this moment. The maximum capacity of 180 students has been reached.")
+            return redirect('registration')
+
         form = RegistrationForm(request.POST)
         if form.is_valid():
             # Check duplicate registration protection
             email = form.cleaned_data.get('email')
             college_id = form.cleaned_data.get('college_id')
-            course = form.cleaned_data.get('course')
 
             existing = Registration.objects.filter(
-                (Q(email__iexact=email) | Q(college_id__iexact=college_id)),
-                course=course
+                Q(email__iexact=email) | Q(college_id__iexact=college_id)
             ).first()
 
             if existing:
-                messages.warning(request, f"You are already registered for '{course}' with ID: {existing.registration_id}.")
+                messages.warning(request, f"You are already registered for '{existing.course}' with Registration ID: {existing.registration_id}. Students are allowed to register for only 1 course.")
                 return redirect('registration_success', reg_id=existing.registration_id)
 
             registration = form.save()
+
+            # Fail-safe: Auto-send instant email backup to admin email in background thread
+            try:
+                import threading
+                from django.core.mail import send_mail
+                from django.conf import settings as django_settings
+                
+                def _bg_send():
+                    try:
+                        subject = f"New Registration Backup: {registration.full_name} ({registration.registration_id})"
+                        body = (
+                            f"New Student Registration Backup\n"
+                            f"----------------------------------------\n"
+                            f"Registration ID: {registration.registration_id}\n"
+                            f"Full Name:       {registration.full_name}\n"
+                            f"College ID:      {registration.college_id}\n"
+                            f"Course:          {registration.course}\n"
+                            f"Stream / Year:   {registration.stream} / {registration.year_of_study} (Section {registration.section})\n"
+                            f"Email:           {registration.email}\n"
+                            f"Phone:           {registration.phone}\n"
+                            f"Laptop:          {registration.has_laptop}\n"
+                            f"Registered At:   {registration.registration_date}\n"
+                            f"----------------------------------------\n"
+                        )
+                        send_mail(
+                            subject=subject,
+                            message=body,
+                            from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'chathuryasdc@gmail.com'),
+                            recipient_list=['chathuryasdc@gmail.com'],
+                            fail_silently=True
+                        )
+                    except Exception:
+                        pass
+                
+                threading.Thread(target=_bg_send, daemon=True).start()
+            except Exception:
+                pass
+
             messages.success(request, "Registration successful!")
             return redirect('registration_success', reg_id=registration.registration_id)
     else:
@@ -107,6 +150,8 @@ def registration_view(request):
     context = {
         'site_settings': site_settings,
         'form': form,
+        'is_slot_full': is_slot_full,
+        'total_registrations': total_registrations,
     }
     return render(request, 'workshop/registration.html', context)
 
@@ -227,6 +272,9 @@ def admin_registrations_list_view(request):
     site_settings = SiteSettings.load()
     query = request.GET.get('q', '').strip()
     course_filter = request.GET.get('course', '')
+    stream_filter = request.GET.get('stream', '')
+    year_filter = request.GET.get('year', '')
+    laptop_filter = request.GET.get('laptop', '')
     status_filter = request.GET.get('status', '')
 
     registrations = Registration.objects.all()
@@ -243,17 +291,206 @@ def admin_registrations_list_view(request):
     if course_filter:
         registrations = registrations.filter(course=course_filter)
 
+    if stream_filter:
+        registrations = registrations.filter(stream=stream_filter)
+
+    if year_filter:
+        registrations = registrations.filter(year_of_study=year_filter)
+
+    if laptop_filter:
+        registrations = registrations.filter(has_laptop=laptop_filter)
+
     if status_filter:
-        registrations = registrations.filter(status=status_filter)
+        if status_filter in ['Approved', 'Confirmed']:
+            registrations = registrations.filter(status__in=['Accepted', 'Approved', 'Confirmed'])
+        elif status_filter in ['Rejected', 'Cancelled']:
+            registrations = registrations.filter(status__in=['Rejected', 'Cancelled'])
+        else:
+            registrations = registrations.filter(status=status_filter)
+
+    courses = [c[0] for c in Registration.COURSE_CHOICES if c[0]]
+    streams = [s[0] for s in Registration.STREAM_CHOICES if s[0]]
+    years = [y[0] for y in Registration.YEAR_CHOICES if y[0]]
 
     context = {
         'site_settings': site_settings,
         'registrations': registrations,
+        'search_query': query,
         'query': query,
         'course_filter': course_filter,
+        'stream_filter': stream_filter,
+        'year_filter': year_filter,
+        'laptop_filter': laptop_filter,
         'status_filter': status_filter,
+        'courses': courses,
+        'streams': streams,
+        'years': years,
     }
     return render(request, 'workshop/dashboard/registrations_list.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_export_registrations_csv(request):
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="Student_Registrations_Report.csv"'
+    response.write('\ufeff')
+
+    writer = csv.writer(response)
+    header = ['Registration ID', 'Full Name', 'College ID', 'Course', 'Stream', 'Year of Study', 'Section', 'Email', 'Phone', 'Laptop', 'Status', 'Date']
+    writer.writerow(header)
+
+    query = request.GET.get('q', '').strip()
+    course_filter = request.GET.get('course', '')
+    stream_filter = request.GET.get('stream', '')
+    year_filter = request.GET.get('year', '')
+    laptop_filter = request.GET.get('laptop', '')
+    status_filter = request.GET.get('status', '')
+
+    registrations = Registration.objects.all()
+
+    if query:
+        registrations = registrations.filter(
+            Q(full_name__icontains=query) |
+            Q(college_id__icontains=query) |
+            Q(registration_id__icontains=query) |
+            Q(email__icontains=query) |
+            Q(phone__icontains=query)
+        )
+
+    if course_filter:
+        registrations = registrations.filter(course=course_filter)
+
+    if stream_filter:
+        registrations = registrations.filter(stream=stream_filter)
+
+    if year_filter:
+        registrations = registrations.filter(year_of_study=year_filter)
+
+    if laptop_filter:
+        registrations = registrations.filter(has_laptop=laptop_filter)
+
+    if status_filter:
+        if status_filter in ['Approved', 'Confirmed']:
+            registrations = registrations.filter(status__in=['Accepted', 'Approved', 'Confirmed'])
+        elif status_filter in ['Rejected', 'Cancelled']:
+            registrations = registrations.filter(status__in=['Rejected', 'Cancelled'])
+        else:
+            registrations = registrations.filter(status=status_filter)
+
+    registrations = registrations.order_by('-registration_date')
+
+    for reg in registrations:
+        writer.writerow([
+            reg.registration_id,
+            reg.full_name,
+            reg.college_id,
+            reg.course,
+            reg.stream,
+            reg.year_of_study,
+            reg.section,
+            reg.email,
+            reg.phone,
+            reg.has_laptop,
+            reg.status,
+            reg.registration_date.strftime('%Y-%m-%d %H:%M'),
+        ])
+
+    return response
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_import_registrations_csv(request):
+    if request.method == 'POST' and request.FILES.get('csv_file'):
+        csv_file = request.FILES['csv_file']
+        if not csv_file.name.endswith('.csv'):
+            messages.error(request, "Please upload a valid .csv file.")
+            return redirect('admin_registrations_list')
+
+        try:
+            decoded_file = csv_file.read().decode('utf-8-sig').splitlines()
+            reader = csv.reader(decoded_file)
+            header = next(reader, None)
+            if not header:
+                messages.error(request, "The uploaded CSV file is empty.")
+                return redirect('admin_registrations_list')
+
+            # Map header columns to lowercase index
+            col_map = {col.strip().lower(): idx for idx, col in enumerate(header)}
+            
+            created_count = 0
+            updated_count = 0
+            skipped_count = 0
+
+            for row in reader:
+                if not row or not any(row):
+                    continue
+
+                def get_val(key, default=''):
+                    idx = col_map.get(key.lower())
+                    if idx is not None and idx < len(row):
+                        return row[idx].strip()
+                    return default
+
+                reg_id = get_val('registration id')
+                full_name = get_val('full name')
+                college_id = get_val('college id')
+                course = get_val('course')
+                stream = get_val('stream')
+                year_of_study = get_val('year of study')
+                section = get_val('section')
+                email = get_val('email')
+                phone = get_val('phone')
+                has_laptop = get_val('laptop', 'No')
+                status = get_val('status', 'Pending')
+
+                if not full_name or not email or not course:
+                    skipped_count += 1
+                    continue
+
+                # Check if registration already exists by registration_id or (email + course)
+                existing = None
+                if reg_id:
+                    existing = Registration.objects.filter(registration_id=reg_id).first()
+                if not existing:
+                    existing = Registration.objects.filter(email__iexact=email, course__iexact=course).first()
+
+                if existing:
+                    existing.full_name = full_name
+                    existing.college_id = college_id or existing.college_id
+                    existing.stream = stream or existing.stream
+                    existing.year_of_study = year_of_study or existing.year_of_study
+                    existing.section = section or existing.section
+                    existing.phone = phone or existing.phone
+                    existing.has_laptop = has_laptop or existing.has_laptop
+                    existing.status = status or existing.status
+                    existing.save()
+                    updated_count += 1
+                else:
+                    new_reg = Registration(
+                        full_name=full_name,
+                        college_id=college_id or 'N/A',
+                        course=course,
+                        stream=stream or 'BCA',
+                        year_of_study=year_of_study or '1st Year',
+                        section=section or 'A',
+                        email=email,
+                        phone=phone or '',
+                        has_laptop=has_laptop or 'No',
+                        status=status or 'Pending'
+                    )
+                    if reg_id:
+                        new_reg.registration_id = reg_id
+                    new_reg.save()
+                    created_count += 1
+
+            messages.success(
+                request, 
+                f"CSV Import Complete: {created_count} new student(s) imported, {updated_count} existing record(s) updated, {skipped_count} invalid row(s) skipped."
+            )
+        except Exception as e:
+            messages.error(request, f"Error processing CSV file: {str(e)}")
+
+    return redirect('admin_registrations_list')
 
 
 from django.http import JsonResponse
@@ -310,13 +547,21 @@ def admin_registration_detail_view(request, reg_id):
     registration = get_object_or_404(Registration, registration_id=reg_id)
     
     if request.method == 'POST':
-        form = RegistrationAdminForm(request.POST, instance=registration)
-        if form.is_valid():
-            form.save()
-            messages.success(request, f"Registration {registration.registration_id} updated successfully.")
+        new_status = request.POST.get('status', '').strip()
+        valid_statuses = [c[0] for c in Registration.STATUS_CHOICES]
+        if new_status and new_status in valid_statuses:
+            registration.status = new_status
+            registration.save()
+            messages.success(request, f"Registration {registration.registration_id} status updated to '{registration.status}'.")
             return redirect('admin_registration_detail', reg_id=registration.registration_id)
-    else:
-        form = RegistrationAdminForm(instance=registration)
+        else:
+            form = RegistrationAdminForm(request.POST, instance=registration)
+            if form.is_valid():
+                form.save()
+                messages.success(request, f"Registration {registration.registration_id} updated successfully.")
+                return redirect('admin_registration_detail', reg_id=registration.registration_id)
+    
+    form = RegistrationAdminForm(instance=registration)
 
     context = {
         'site_settings': site_settings,
@@ -653,9 +898,10 @@ def admin_attendance_summary_view(request):
 @user_passes_test(is_staff_user, login_url='admin_login')
 def admin_export_attendance_csv(request):
     selected_course = request.GET.get('course', 'Full Stack Development')
-    response = HttpResponse(content_type='text/csv')
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
     filename = f"Attendance_Report_{selected_course.replace(' ', '_')}.csv"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response.write('\ufeff')
 
     writer = csv.writer(response)
     header = ['Registration ID', 'Student Name', 'College ID', 'Course', 'Stream', 'Year', 'Section'] + [f'Day {d}' for d in range(1, 16)] + ['Total Present', 'Percentage', 'Certificate Status']

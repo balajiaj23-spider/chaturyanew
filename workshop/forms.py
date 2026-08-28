@@ -29,8 +29,10 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_college_id(self):
         college_id = self.cleaned_data.get('college_id', '').strip().upper()
-        if not re.match(r'^[a-zA-Z0-9-]{3,15}$', college_id):
-            raise forms.ValidationError("Please enter a valid College ID Number (e.g. 24CA000).")
+        if college_id and college_id[0].isalpha():
+            raise forms.ValidationError("College ID always starts with a number (e.g. 250CB024).")
+        if not re.match(r'^[0-9][a-zA-Z0-9-]{2,14}$', college_id):
+            raise forms.ValidationError("Please enter a valid College ID starting with a number (e.g. 250CB024).")
         return college_id
 
     def clean_phone(self):
@@ -43,19 +45,18 @@ class RegistrationForm(forms.ModelForm):
         cleaned_data = super().clean()
         college_id = cleaned_data.get('college_id')
         email = cleaned_data.get('email')
-        course = cleaned_data.get('course')
 
-        if college_id and course:
-            # Check for duplicate college_id for the same course
-            duplicate_id = Registration.objects.filter(college_id__iexact=college_id, course=course).exists()
-            if duplicate_id:
-                raise forms.ValidationError(f"A registration already exists with College ID '{college_id}' for '{course}'.")
+        if college_id:
+            # Check for duplicate college_id across ALL courses (Strict 1 course per student)
+            existing_id = Registration.objects.filter(college_id__iexact=college_id).first()
+            if existing_id:
+                raise forms.ValidationError(f"You are already registered for '{existing_id.course}' with College ID '{college_id}'. Students are allowed to register for only 1 course.")
 
-        if email and course:
-            # Check for duplicate email for the same course
-            duplicate_email = Registration.objects.filter(email__iexact=email, course=course).exists()
-            if duplicate_email:
-                raise forms.ValidationError(f"A registration already exists with Email '{email}' for '{course}'.")
+        if email:
+            # Check for duplicate email across ALL courses (Strict 1 course per student)
+            existing_email = Registration.objects.filter(email__iexact=email).first()
+            if existing_email:
+                raise forms.ValidationError(f"You are already registered for '{existing_email.course}' with Email '{email}'. Students are allowed to register for only 1 course.")
 
         return cleaned_data
 

@@ -141,10 +141,7 @@ class Registration(models.Model):
     STATUS_CHOICES = [
         ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),
-        ('Approved', 'Approved'),
         ('Rejected', 'Rejected'),
-        ('Confirmed', 'Confirmed'),
-        ('Cancelled', 'Cancelled'),
     ]
 
     registration_id = models.CharField(max_length=50, unique=True, editable=False)
