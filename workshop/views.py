@@ -14,6 +14,17 @@ from .forms import RegistrationForm, SiteSettingsForm, CourseForm, CourseTopicFo
 def is_staff_user(user):
     return user.is_authenticated and user.is_staff
 
+
+def normalize_course_name(course_input):
+    if not course_input:
+        return 'Full Stack Development'
+    c_lower = course_input.strip().lower()
+    if c_lower in ['fullstack', 'fullstack-development', 'full stack development', 'full stack']:
+        return 'Full Stack Development'
+    elif c_lower in ['data-analytics', 'analytics', 'data analytics']:
+        return 'Data Analytics'
+    return course_input.strip()
+
 # ==================== FRONTEND PUBLIC VIEWS ====================
 
 def home_view(request):
@@ -358,7 +369,8 @@ def admin_export_registrations_csv(request):
         )
 
     if course_filter:
-        registrations = registrations.filter(course=course_filter)
+        norm_course = normalize_course_name(course_filter)
+        registrations = registrations.filter(Q(course__iexact=course_filter) | Q(course__iexact=norm_course))
 
     if stream_filter:
         registrations = registrations.filter(stream=stream_filter)
@@ -380,19 +392,20 @@ def admin_export_registrations_csv(request):
     registrations = registrations.order_by('-registration_date')
 
     for reg in registrations:
+        date_str = reg.registration_date.strftime('%Y-%m-%d %H:%M') if reg.registration_date else ''
         writer.writerow([
-            reg.registration_id,
-            reg.full_name,
-            reg.college_id,
-            reg.course,
-            reg.stream,
-            reg.year_of_study,
-            reg.section,
-            reg.email,
-            reg.phone,
-            reg.has_laptop,
-            reg.status,
-            reg.registration_date.strftime('%Y-%m-%d %H:%M'),
+            reg.registration_id or '',
+            reg.full_name or '',
+            reg.college_id or '',
+            reg.course or '',
+            reg.stream or '',
+            reg.year_of_study or '',
+            reg.section or '',
+            reg.email or '',
+            reg.phone or '',
+            reg.has_laptop or '',
+            reg.status or '',
+            date_str,
         ])
 
     return response
@@ -858,22 +871,23 @@ def admin_attendance_scan_api(request):
 @user_passes_test(is_staff_user, login_url='admin_login')
 def admin_attendance_summary_view(request):
     site_settings = SiteSettings.load()
-    selected_course = request.GET.get('course', 'Full Stack Development')
+    raw_course = request.GET.get('course', 'Full Stack Development') or 'Full Stack Development'
+    selected_course = normalize_course_name(raw_course)
     students = Registration.objects.filter(course=selected_course).order_by('full_name')
+
+    # Fetch all present attendance records for this course in a single query
+    present_records = set(
+        AttendanceRecord.objects.filter(
+            registration__course=selected_course,
+            is_present=True
+        ).values_list('registration_id', 'session_day')
+    )
 
     # Build student matrix stats
     summary_data = []
     for student in students:
-        records = AttendanceRecord.objects.filter(registration=student)
-        day_list = []
-        present_count = 0
-        for day in range(1, 16):
-            rec = records.filter(session_day=day).first()
-            is_p = bool(rec and rec.is_present)
-            if is_p:
-                present_count += 1
-            day_list.append(is_p)
-
+        day_list = [(student.id, day) in present_records for day in range(1, 16)]
+        present_count = sum(day_list)
         percentage = round((present_count / 15.0) * 100, 1)
         eligible_for_certificate = percentage >= 50.0
 
@@ -897,9 +911,12 @@ def admin_attendance_summary_view(request):
 
 @user_passes_test(is_staff_user, login_url='admin_login')
 def admin_export_attendance_csv(request):
-    selected_course = request.GET.get('course', 'Full Stack Development')
+    raw_course = request.GET.get('course', 'Full Stack Development') or 'Full Stack Development'
+    selected_course = normalize_course_name(raw_course)
+    
     response = HttpResponse(content_type='text/csv; charset=utf-8')
-    filename = f"Attendance_Report_{selected_course.replace(' ', '_')}.csv"
+    safe_filename_course = selected_course.replace(' ', '_').replace('/', '_')
+    filename = f"Attendance_Report_{safe_filename_course}.csv"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     response.write('\ufeff')
 
@@ -908,13 +925,20 @@ def admin_export_attendance_csv(request):
     writer.writerow(header)
 
     students = Registration.objects.filter(course=selected_course).order_by('full_name')
+
+    # Single query lookup for CSV export
+    present_records = set(
+        AttendanceRecord.objects.filter(
+            registration__course=selected_course,
+            is_present=True
+        ).values_list('registration_id', 'session_day')
+    )
+
     for student in students:
-        records = AttendanceRecord.objects.filter(registration=student)
         day_cells = []
         present_count = 0
         for day in range(1, 16):
-            rec = records.filter(session_day=day).first()
-            if rec and rec.is_present:
+            if (student.id, day) in present_records:
                 day_cells.append('P')
                 present_count += 1
             else:
@@ -924,13 +948,13 @@ def admin_export_attendance_csv(request):
         cert_status = "Qualified (>=50%)" if pct >= 50.0 else "Not Qualified (<50%)"
 
         row = [
-            student.registration_id,
-            student.full_name,
-            student.college_id,
-            student.course,
-            student.stream,
-            student.year_of_study,
-            student.section,
+            student.registration_id or '',
+            student.full_name or '',
+            student.college_id or '',
+            student.course or '',
+            student.stream or '',
+            student.year_of_study or '',
+            student.section or '',
         ] + day_cells + [present_count, f"{pct}%", cert_status]
 
         writer.writerow(row)
