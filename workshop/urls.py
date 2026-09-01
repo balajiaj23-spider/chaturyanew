@@ -37,4 +37,9 @@ urlpatterns = [
     path('custom-admin/attendance/scan-api/', views.admin_attendance_scan_api, name='admin_attendance_scan_api'),
     path('custom-admin/attendance/summary/', views.admin_attendance_summary_view, name='admin_attendance_summary'),
     path('custom-admin/attendance/export/', views.admin_export_attendance_csv, name='admin_attendance_export'),
+
+    # Student Feedback Routes
+    path('feedback/', views.feedback_view, name='feedback'),
+    path('custom-admin/feedback/', views.admin_feedback_list_view, name='admin_feedback_list'),
+    path('custom-admin/feedback/export/', views.admin_export_feedback_csv, name='admin_feedback_export'),
 ]

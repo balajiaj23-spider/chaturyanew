@@ -1,6 +1,6 @@
 import re
 from django import forms
-from .models import Registration, SiteSettings, Course, CourseTopic, PreviousEvent
+from .models import Registration, SiteSettings, Course, CourseTopic, PreviousEvent, Feedback
 
 class RegistrationForm(forms.ModelForm):
     class Meta:
@@ -148,3 +148,39 @@ class RegistrationAdminForm(forms.ModelForm):
     def clean_college_id(self):
         college_id = self.cleaned_data.get('college_id', '').strip().upper()
         return college_id
+
+
+class FeedbackForm(forms.ModelForm):
+    class Meta:
+        model = Feedback
+        fields = ['student_name', 'college_id', 'course', 'overall_rating', 'content_rating', 'instructor_rating', 'comments']
+        widgets = {
+            'student_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your full name'}),
+            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 250CB024', 'style': 'text-transform: uppercase;', 'oninput': 'this.value = this.value.toUpperCase();'}),
+            'course': forms.Select(attrs={'class': 'form-control'}),
+            'overall_rating': forms.Select(attrs={'class': 'form-control'}),
+            'content_rating': forms.Select(attrs={'class': 'form-control'}),
+            'instructor_rating': forms.Select(attrs={'class': 'form-control'}),
+            'comments': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Share your detailed feedback, key learnings, or suggestions for improvement...'}),
+        }
+
+    def clean_student_name(self):
+        name = self.cleaned_data.get('student_name', '').strip()
+        if len(name) < 2:
+            raise forms.ValidationError("Please enter your full name (at least 2 characters).")
+        return name
+
+    def clean_college_id(self):
+        college_id = self.cleaned_data.get('college_id', '').strip().upper()
+        if not college_id:
+            raise forms.ValidationError("College ID is mandatory for submitting feedback.")
+        if college_id[0].isalpha():
+            raise forms.ValidationError("College ID starts with a number (e.g. 250CB024).")
+        return college_id
+
+    def clean_comments(self):
+        comments = self.cleaned_data.get('comments', '').strip()
+        if len(comments) < 5:
+            raise forms.ValidationError("Please provide feedback comments (at least 5 characters).")
+        return comments
+

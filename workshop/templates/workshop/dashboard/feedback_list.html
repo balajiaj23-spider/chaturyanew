@@ -1,0 +1,137 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Student Feedback Analytics — Admin Dashboard{% endblock %}
+
+{% block content %}
+<section class="detail-section" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+  <div class="container">
+    
+    <!-- Admin Bar Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+      <div>
+        <div class="badge" style="margin-bottom: 0.25rem;">Administrator Control Panel</div>
+        <h2>💬 Student Workshop Feedback &amp; Rating Analytics</h2>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary btn-sm">← Back to Dashboard</a>
+        <a href="{% url 'admin_feedback_export' %}?course={{ course_filter }}" class="btn btn-primary btn-sm" title="Export Feedback to CSV">📥 Export CSV Report</a>
+      </div>
+    </div>
+
+    <!-- COURSE SEPARATION TABS -->
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); max-width: 100%; box-sizing: border-box;">
+      <a href="?course=" class="btn {% if not course_filter %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700;">
+        🌟 All Courses
+      </a>
+      <a href="?course=Full Stack Development" class="btn {% if course_filter == 'Full Stack Development' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700;">
+        💻 Full Stack Development
+      </a>
+      <a href="?course=Data Analytics" class="btn {% if course_filter == 'Data Analytics' %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700;">
+        📊 Data Analytics
+      </a>
+    </div>
+
+    <!-- Analytics Stat Cards Grid -->
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 2rem; gap: 1.25rem;">
+      <div class="stat-card" style="padding: 1.25rem;">
+        <div class="stat-number" style="font-size: 2.2rem; font-weight: 800; color: var(--accent); margin-bottom: 0.25rem;">{{ total_feedbacks }}</div>
+        <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary);">Total Submissions</div>
+      </div>
+
+      <div class="stat-card" style="padding: 1.25rem;">
+        <div class="stat-number" style="font-size: 2.2rem; font-weight: 800; color: #28a745; margin-bottom: 0.25rem;">{{ avg_overall }} <span style="font-size: 1.1rem; color: var(--text-secondary);">/ 5.0 ⭐</span></div>
+        <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary);">Overall Rating Avg</div>
+      </div>
+
+      <div class="stat-card" style="padding: 1.25rem;">
+        <div class="stat-number" style="font-size: 2.2rem; font-weight: 800; color: #ffc107; margin-bottom: 0.25rem;">{{ avg_content }} <span style="font-size: 1.1rem; color: var(--text-secondary);">/ 5.0 ⭐</span></div>
+        <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary);">Content Quality Avg</div>
+      </div>
+
+      <div class="stat-card" style="padding: 1.25rem;">
+        <div class="stat-number" style="font-size: 2.2rem; font-weight: 800; color: #17a2b8; margin-bottom: 0.25rem;">{{ avg_instructor }} <span style="font-size: 1.1rem; color: var(--text-secondary);">/ 5.0 ⭐</span></div>
+        <div class="stat-label" style="font-size: 0.85rem; color: var(--text-secondary);">Instructor Support Avg</div>
+      </div>
+    </div>
+
+    <!-- Rating Distribution Bars -->
+    <div class="detail-card" style="margin-bottom: 2rem;">
+      <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.05rem;">Overall Rating Distribution Breakdown</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+        {% for star, cnt in rating_counts.items %}
+          <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem;">
+            <span style="min-width: 60px; font-weight: 700; color: var(--text-primary);">{{ star }} Star{% if star > 1 %}s{% endif %}</span>
+            <div style="flex: 1; height: 10px; background: var(--bg-secondary); border-radius: 5px; overflow: hidden; border: 1px solid var(--border-subtle);">
+              <div style="width: {% for s, pct in rating_pcts.items %}{% if s == star %}{{ pct }}{% endif %}{% endfor %}%; height: 100%; background: var(--accent); border-radius: 5px;"></div>
+            </div>
+            <span style="min-width: 50px; text-align: right; font-weight: 700; color: var(--accent);">
+              {% for s, pct in rating_pcts.items %}{% if s == star %}{{ pct }}%{% endif %}{% endfor %}
+            </span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Student Feedback Table -->
+    <div class="detail-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.1rem;">Verified Student Feedback Entries ({{ feedbacks.count }})</h3>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="confirmation-table" style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border-subtle); background: var(--bg-secondary); text-align: left;">
+              <th style="padding: 0.75rem; min-width: 160px;">Student Name</th>
+              <th style="padding: 0.75rem; min-width: 110px;">College ID</th>
+              <th style="padding: 0.75rem; min-width: 150px;">Course</th>
+              <th style="padding: 0.75rem; text-align: center;">Overall</th>
+              <th style="padding: 0.75rem; text-align: center;">Content</th>
+              <th style="padding: 0.75rem; text-align: center;">Instructor</th>
+              <th style="padding: 0.75rem; min-width: 250px;">Comments &amp; Feedback</th>
+              <th style="padding: 0.75rem; min-width: 120px;">Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in feedbacks %}
+              <tr style="border-bottom: 1px solid var(--border-subtle);">
+                <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary);">
+                  {{ item.student_name }}
+                  {% if item.registration %}
+                    <div style="font-size: 0.72rem; color: #28a745; font-weight: 700;">✓ Verified Registration</div>
+                  {% endif %}
+                </td>
+                <td style="padding: 0.75rem; font-weight: 600;">{{ item.college_id }}</td>
+                <td style="padding: 0.75rem; color: var(--accent); font-weight: 600;">{{ item.course }}</td>
+                <td style="padding: 0.75rem; text-align: center; font-weight: 800; color: #ffc107;">
+                  {{ item.overall_rating }} ⭐
+                </td>
+                <td style="padding: 0.75rem; text-align: center; font-weight: 800; color: #ffc107;">
+                  {{ item.content_rating }} ⭐
+                </td>
+                <td style="padding: 0.75rem; text-align: center; font-weight: 800; color: #ffc107;">
+                  {{ item.instructor_rating }} ⭐
+                </td>
+                <td style="padding: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                  "{{ item.comments }}"
+                </td>
+                <td style="padding: 0.75rem; font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">
+                  {{ item.created_at|date:"Y-m-d H:i" }}
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="8" style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                  No student feedback entries submitted yet{% if course_filter %} for {{ course_filter }}{% endif %}.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

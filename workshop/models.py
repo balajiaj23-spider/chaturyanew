@@ -218,3 +218,29 @@ class SessionDayStatus(models.Model):
         status = "Completed" if self.is_completed else "In Progress"
         return f"{self.course_name} - Day {self.session_day}: {status}"
 
+
+class Feedback(models.Model):
+    RATING_CHOICES = [(i, f"{i} Star{'s' if i > 1 else ''}") for i in range(1, 6)]
+
+    registration = models.ForeignKey(Registration, on_delete=models.SET_NULL, null=True, blank=True, related_name='feedbacks')
+    student_name = models.CharField(max_length=200)
+    college_id = models.CharField(max_length=50)
+    course = models.CharField(max_length=100, choices=Registration.COURSE_CHOICES)
+    overall_rating = models.IntegerField(choices=RATING_CHOICES, default=5)
+    content_rating = models.IntegerField(choices=RATING_CHOICES, default=5)
+    instructor_rating = models.IntegerField(choices=RATING_CHOICES, default=5)
+    comments = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        if self.college_id:
+            self.college_id = self.college_id.strip().upper()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Feedback by {self.student_name} ({self.college_id}) - {self.course}: {self.overall_rating} Stars"
+
+

@@ -1,0 +1,129 @@
+{% extends 'workshop/base.html' %}
+{% load static %}
+
+{% block title %}Student Feedback Form — {{ site_settings.club_name }}{% endblock %}
+
+{% block content %}
+<main class="registration-section">
+  <div class="container">
+    
+    <div class="form-wrapper">
+      <div class="form-header">
+        <div class="badge" style="margin-bottom: 0.75rem;">
+          <span class="badge-dot"></span>
+          Workshop Feedback Portal
+        </div>
+        <h1>Student Workshop Feedback</h1>
+        <p>Share your experience, ratings, and thoughts on our technical workshops</p>
+      </div>
+
+      {% if form.non_field_errors %}
+        <div style="width: 100%; padding: 1.1rem 1.5rem; margin-bottom: 1.5rem; background: rgba(138, 43, 226, 0.12); border: 1px solid var(--accent, #a855f7); border-radius: 10px; color: var(--text-primary, #fff); font-weight: 600; text-align: center; box-shadow: 0 4px 20px rgba(138, 43, 226, 0.15);">
+          {% for error in form.non_field_errors %}
+            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem;">
+              <span style="color: var(--accent, #a855f7);">⚠️</span> {{ error }}
+            </p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" class="registration-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Student Identification Header -->
+        <div style="margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.9rem; font-weight: 700; color: var(--accent);">
+          👤 Student Verification Details
+        </div>
+        
+        <!-- 1. Full Name -->
+        <div class="form-group">
+          <label for="{{ form.student_name.id_for_label }}">Student Full Name <span style="color: var(--accent);">*</span></label>
+          {{ form.student_name }}
+          {% if form.student_name.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.student_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- 2. College ID -->
+        <div class="form-group">
+          <label for="{{ form.college_id.id_for_label }}">College ID <span style="color: var(--accent);">*</span></label>
+          {{ form.college_id }}
+          <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 0.25rem;">Starts with a number (e.g. 250CB024)</span>
+          {% if form.college_id.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.college_id.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- 3. Workshop Course -->
+        <div class="form-group">
+          <label for="{{ form.course.id_for_label }}">Workshop Course <span style="color: var(--accent);">*</span></label>
+          {{ form.course }}
+          {% if form.course.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.course.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Ratings Header -->
+        <div style="margin-top: 2rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.9rem; font-weight: 700; color: var(--accent);">
+          ⭐ Workshop Session Ratings
+        </div>
+
+        <!-- 4. Overall Workshop Rating -->
+        <div class="form-group">
+          <label for="{{ form.overall_rating.id_for_label }}">Overall Workshop Rating ⭐ <span style="color: var(--accent);">*</span></label>
+          {{ form.overall_rating }}
+          {% if form.overall_rating.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.overall_rating.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- 5. Content Quality Rating -->
+        <div class="form-group">
+          <label for="{{ form.content_rating.id_for_label }}">Course Content &amp; Material Quality ⭐ <span style="color: var(--accent);">*</span></label>
+          {{ form.content_rating }}
+          {% if form.content_rating.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.content_rating.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- 6. Instructor Rating -->
+        <div class="form-group">
+          <label for="{{ form.instructor_rating.id_for_label }}">Instructor Teaching &amp; Support ⭐ <span style="color: var(--accent);">*</span></label>
+          {{ form.instructor_rating }}
+          {% if form.instructor_rating.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.instructor_rating.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Comments Header -->
+        <div style="margin-top: 2rem; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); font-size: 0.9rem; font-weight: 700; color: var(--accent);">
+          💬 Detailed Comments &amp; Suggestions
+        </div>
+
+        <!-- 7. Feedback Comments -->
+        <div class="form-group">
+          <label for="{{ form.comments.id_for_label }}">Detailed Feedback &amp; Suggestions <span style="color: var(--accent);">*</span></label>
+          {{ form.comments }}
+          {% if form.comments.errors %}
+            <div style="color: #ff5f56; font-size: 0.8rem; margin-top: 0.25rem;">{{ form.comments.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <div style="margin-top: 2rem;">
+          <button type="submit" class="btn btn-primary btn-block" style="padding: 0.9rem; font-size: 1.05rem; font-weight: 700;">
+            💬 Submit Workshop Feedback
+          </button>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+          <p style="font-size: 0.8rem; color: var(--text-secondary);">
+            Conducted as part of the official student technical &amp; learning activities of {{ site_settings.club_name }}.
+          </p>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

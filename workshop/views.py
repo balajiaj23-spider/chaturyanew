@@ -8,8 +8,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User
-from .models import SiteSettings, PreviousEvent, Course, CourseTopic, CourseProject, Registration, AttendanceRecord, SessionDayStatus
-from .forms import RegistrationForm, SiteSettingsForm, CourseForm, CourseTopicForm, PreviousEventForm, RegistrationAdminForm
+from .models import SiteSettings, PreviousEvent, Course, CourseTopic, CourseProject, Registration, AttendanceRecord, SessionDayStatus, Feedback
+from .forms import RegistrationForm, SiteSettingsForm, CourseForm, CourseTopicForm, PreviousEventForm, RegistrationAdminForm, FeedbackForm
 
 def is_staff_user(user):
     return user.is_authenticated and user.is_staff
@@ -960,3 +960,114 @@ def admin_export_attendance_csv(request):
         writer.writerow(row)
 
     return response
+
+
+# ==================== STUDENT FEEDBACK VIEWS ====================
+
+def feedback_view(request):
+    site_settings = SiteSettings.load()
+    selected_course = request.GET.get('course', 'Full Stack Development')
+    selected_course = normalize_course_name(selected_course)
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            reg = Registration.objects.filter(college_id__iexact=feedback.college_id).first()
+            if reg:
+                feedback.registration = reg
+                if not feedback.student_name:
+                    feedback.student_name = reg.full_name
+            feedback.save()
+            messages.success(request, f"✓ Thank you, {feedback.student_name}! Your feedback for '{feedback.course}' has been submitted successfully.")
+            return redirect('feedback')
+        else:
+            messages.error(request, "Please correct the highlighted errors below before submitting.")
+    else:
+        form = FeedbackForm(initial={'course': selected_course})
+
+    context = {
+        'site_settings': site_settings,
+        'form': form,
+        'selected_course': selected_course,
+    }
+    return render(request, 'workshop/feedback.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_feedback_list_view(request):
+    site_settings = SiteSettings.load()
+    course_filter = request.GET.get('course', '')
+
+    feedbacks = Feedback.objects.all().order_by('-created_at')
+
+    if course_filter:
+        norm_course = normalize_course_name(course_filter)
+        feedbacks = feedbacks.filter(Q(course__iexact=course_filter) | Q(course__iexact=norm_course))
+
+    total_feedbacks = feedbacks.count()
+
+    if total_feedbacks > 0:
+        avg_overall = round(sum(f.overall_rating for f in feedbacks) / total_feedbacks, 1)
+        avg_content = round(sum(f.content_rating for f in feedbacks) / total_feedbacks, 1)
+        avg_instructor = round(sum(f.instructor_rating for f in feedbacks) / total_feedbacks, 1)
+    else:
+        avg_overall = 0.0
+        avg_content = 0.0
+        avg_instructor = 0.0
+
+    rating_counts = {i: feedbacks.filter(overall_rating=i).count() for i in range(5, 0, -1)}
+    rating_pcts = {i: round((cnt / total_feedbacks * 100), 1) if total_feedbacks > 0 else 0 for i, cnt in rating_counts.items()}
+
+    context = {
+        'site_settings': site_settings,
+        'feedbacks': feedbacks,
+        'total_feedbacks': total_feedbacks,
+        'avg_overall': avg_overall,
+        'avg_content': avg_content,
+        'avg_instructor': avg_instructor,
+        'rating_counts': rating_counts,
+        'rating_pcts': rating_pcts,
+        'course_filter': course_filter,
+        'courses_list': ['Full Stack Development', 'Data Analytics'],
+    }
+    return render(request, 'workshop/dashboard/feedback_list.html', context)
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_export_feedback_csv(request):
+    course_filter = request.GET.get('course', '')
+
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    filename = "Student_Feedback_Report.csv"
+    if course_filter:
+        norm_c = normalize_course_name(course_filter)
+        filename = f"Feedback_Report_{norm_c.replace(' ', '_')}.csv"
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response.write('\ufeff')
+
+    writer = csv.writer(response)
+    header = ['Feedback ID', 'Student Name', 'College ID', 'Course', 'Overall Rating', 'Content Rating', 'Instructor Rating', 'Comments', 'Submitted Date']
+    writer.writerow(header)
+
+    feedbacks = Feedback.objects.all().order_by('-created_at')
+    if course_filter:
+        norm_c = normalize_course_name(course_filter)
+        feedbacks = feedbacks.filter(Q(course__iexact=course_filter) | Q(course__iexact=norm_c))
+
+    for f in feedbacks:
+        created_str = f.created_at.strftime('%Y-%m-%d %H:%M') if f.created_at else ''
+        writer.writerow([
+            f"FB-{f.id}",
+            f.student_name or '',
+            f.college_id or '',
+            f.course or '',
+            f"{f.overall_rating}/5",
+            f"{f.content_rating}/5",
+            f"{f.instructor_rating}/5",
+            f.comments or '',
+            created_str,
+        ])
+
+    return response
+
