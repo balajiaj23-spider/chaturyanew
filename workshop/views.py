@@ -1,10 +1,12 @@
 import csv
 import json
+import urllib.parse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User
@@ -560,26 +562,26 @@ def admin_registration_detail_view(request, reg_id):
     registration = get_object_or_404(Registration, registration_id=reg_id)
     
     if request.method == 'POST':
-        new_status = request.POST.get('status', '').strip()
-        valid_statuses = [c[0] for c in Registration.STATUS_CHOICES]
-        if new_status and new_status in valid_statuses:
-            registration.status = new_status
-            registration.save()
-            messages.success(request, f"Registration {registration.registration_id} status updated to '{registration.status}'.")
-            return redirect('admin_registration_detail', reg_id=registration.registration_id)
+        form = RegistrationAdminForm(request.POST, instance=registration)
+        if form.is_valid():
+            updated_reg = form.save()
+            # Keep attendance records course name in sync if course changed
+            AttendanceRecord.objects.filter(registration=updated_reg).update(course_name=updated_reg.course)
+            messages.success(request, f"✓ Student details for {updated_reg.full_name} ({updated_reg.college_id}) updated successfully.")
+            return redirect('admin_registration_detail', reg_id=updated_reg.registration_id)
         else:
-            form = RegistrationAdminForm(request.POST, instance=registration)
-            if form.is_valid():
-                form.save()
-                messages.success(request, f"Registration {registration.registration_id} updated successfully.")
-                return redirect('admin_registration_detail', reg_id=registration.registration_id)
-    
-    form = RegistrationAdminForm(instance=registration)
+            messages.error(request, "⚠️ Please review the form and correct the errors below.")
+    else:
+        form = RegistrationAdminForm(instance=registration)
+
+    # Attendance statistics for this student
+    attendance_count = AttendanceRecord.objects.filter(registration=registration, is_present=True).count()
 
     context = {
         'site_settings': site_settings,
         'registration': registration,
         'form': form,
+        'attendance_count': attendance_count,
     }
     return render(request, 'workshop/dashboard/registration_detail.html', context)
 
@@ -679,10 +681,12 @@ def admin_settings_edit_view(request):
 @user_passes_test(is_staff_user, login_url='admin_login')
 def admin_attendance_view(request):
     site_settings = SiteSettings.load()
-    selected_course = request.GET.get('course', 'Full Stack Development')
+    raw_course = request.POST.get('course') or request.GET.get('course', 'Full Stack Development')
+    selected_course = normalize_course_name(raw_course)
+
     try:
-        selected_day = int(request.GET.get('day', 1))
-    except ValueError:
+        selected_day = int(request.POST.get('day') or request.GET.get('day', 1))
+    except (ValueError, TypeError):
         selected_day = 1
 
     if selected_day < 1:
@@ -695,7 +699,7 @@ def admin_attendance_view(request):
 
     # Process bulk manual form submission or day completion toggle
     if request.method == 'POST':
-        action = request.POST.get('action')
+        action = request.POST.get('action', '').strip()
         if action == 'toggle_day_completion':
             day_status, _ = SessionDayStatus.objects.get_or_create(
                 course_name=selected_course,
@@ -707,21 +711,43 @@ def admin_attendance_view(request):
             day_status.save()
             status_text = "Completed ✓" if day_status.is_completed else "In Progress"
             messages.success(request, f"Day {selected_day} for {selected_course} marked as {status_text}.")
-            return redirect(f"{request.path}?course={selected_course}&day={selected_day}")
+            encoded_course = urllib.parse.quote_plus(selected_course)
+            return redirect(f"{request.path}?course={encoded_course}&day={selected_day}")
         else:
-            present_student_ids = request.POST.getlist('present_students')
-            for student in students:
-                is_present = str(student.id) in present_student_ids
-                AttendanceRecord.objects.update_or_create(
-                    registration=student,
-                    session_day=selected_day,
-                    defaults={
-                        'course_name': selected_course,
-                        'is_present': is_present,
-                    }
-                )
-            messages.success(request, f"Attendance updated for {selected_course} - Day {selected_day}.")
-            return redirect(f"{request.path}?course={selected_course}&day={selected_day}")
+            try:
+                present_student_ids = set(request.POST.getlist('present_students'))
+                with transaction.atomic():
+                    for student in students:
+                        is_present = str(student.id) in present_student_ids
+                        # Clean up any potential duplicates and save correctly
+                        records = AttendanceRecord.objects.filter(
+                            registration=student,
+                            session_day=selected_day
+                        )
+                        if records.count() > 1:
+                            primary = records.first()
+                            records.exclude(id=primary.id).delete()
+                            primary.course_name = selected_course
+                            primary.is_present = is_present
+                            primary.save()
+                        elif records.exists():
+                            record = records.first()
+                            record.course_name = selected_course
+                            record.is_present = is_present
+                            record.save()
+                        else:
+                            AttendanceRecord.objects.create(
+                                registration=student,
+                                session_day=selected_day,
+                                course_name=selected_course,
+                                is_present=is_present
+                            )
+                messages.success(request, f"✓ Attendance roster saved successfully for {selected_course} — Day {selected_day}.")
+            except Exception as e:
+                messages.error(request, f"⚠️ Error saving attendance roster: {str(e)}")
+
+            encoded_course = urllib.parse.quote_plus(selected_course)
+            return redirect(f"{request.path}?course={encoded_course}&day={selected_day}")
 
     # Build attendance status map for current day
     attendance_records = AttendanceRecord.objects.filter(
@@ -1071,3 +1097,16 @@ def admin_export_feedback_csv(request):
 
     return response
 
+
+@user_passes_test(is_staff_user, login_url='admin_login')
+def admin_delete_feedback_view(request, feedback_id):
+    if request.method == 'POST':
+        feedback = get_object_or_404(Feedback, id=feedback_id)
+        student_name = feedback.student_name or feedback.college_id
+        feedback.delete()
+        messages.success(request, f"✓ Feedback entry from '{student_name}' has been deleted successfully.")
+    
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and '/custom-admin/' in referer and '/register/' not in referer:
+        return redirect(referer)
+    return redirect('admin_feedback_list')

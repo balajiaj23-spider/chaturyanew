@@ -41,5 +41,6 @@ urlpatterns = [
     # Student Feedback Routes
     path('feedback/', views.feedback_view, name='feedback'),
     path('custom-admin/feedback/', views.admin_feedback_list_view, name='admin_feedback_list'),
+    path('custom-admin/feedback/<int:feedback_id>/delete/', views.admin_delete_feedback_view, name='admin_delete_feedback'),
     path('custom-admin/feedback/export/', views.admin_export_feedback_csv, name='admin_feedback_export'),
 ]

@@ -131,23 +131,55 @@ class PreviousEventForm(forms.ModelForm):
 class RegistrationAdminForm(forms.ModelForm):
     class Meta:
         model = Registration
-        fields = '__all__'
+        fields = [
+            'full_name', 'college_id', 'course', 'email', 'phone',
+            'stream', 'year_of_study', 'section', 'has_laptop', 'status'
+        ]
+        labels = {
+            'full_name': 'Student Full Name',
+            'college_id': 'College ID / Register Number',
+            'course': 'Workshop Course',
+            'email': 'Email Address',
+            'phone': 'Phone / Mobile Number',
+            'stream': 'Academic Stream',
+            'year_of_study': 'Year of Study',
+            'section': 'Class Section',
+            'has_laptop': 'Laptop Availability',
+            'status': 'Registration Status',
+        }
         widgets = {
-            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'college_id': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Rahul Sharma', 'required': 'required'}),
+            'college_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 24CA001', 'style': 'text-transform: uppercase;', 'oninput': 'this.value = this.value.toUpperCase();', 'required': 'required'}),
+            'course': forms.Select(attrs={'class': 'form-control', 'required': 'required'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'student@example.com', 'required': 'required'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '10-digit mobile number', 'maxlength': '15'}),
             'stream': forms.Select(attrs={'class': 'form-control'}),
-            'course': forms.Select(attrs={'class': 'form-control'}),
             'year_of_study': forms.Select(attrs={'class': 'form-control'}),
             'section': forms.Select(attrs={'class': 'form-control'}),
             'has_laptop': forms.Select(attrs={'class': 'form-control'}, choices=[('Yes', 'Yes'), ('No', 'No')]),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
+    def clean_full_name(self):
+        name = self.cleaned_data.get('full_name', '').strip()
+        if len(name) < 2:
+            raise forms.ValidationError("Full name must be at least 2 characters.")
+        return name
+
     def clean_college_id(self):
         college_id = self.cleaned_data.get('college_id', '').strip().upper()
+        if not college_id:
+            raise forms.ValidationError("College ID / Register number is required.")
         return college_id
+
+    def clean(self):
+        cleaned_data = super().clean()
+        college_id = cleaned_data.get('college_id')
+        if college_id and self.instance and self.instance.pk:
+            duplicate = Registration.objects.filter(college_id__iexact=college_id).exclude(pk=self.instance.pk).first()
+            if duplicate:
+                raise forms.ValidationError(f"Another student with College ID '{college_id}' already exists ({duplicate.full_name} — {duplicate.registration_id}).")
+        return cleaned_data
 
 
 class FeedbackForm(forms.ModelForm):

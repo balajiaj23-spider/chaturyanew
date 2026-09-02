@@ -120,16 +120,20 @@
       <!-- ENROLLED STUDENTS ROSTER CHECKLIST (BELOW CAMERA SCANNER) -->
       <div>
         <div class="detail-card">
-          <form method="POST" id="bulkAttendanceForm">
+          <form method="POST" id="bulkAttendanceForm" action="{% url 'admin_attendance' %}?course={{ selected_course|urlencode }}&day={{ selected_day }}">
             {% csrf_token %}
+            <input type="hidden" name="course" value="{{ selected_course }}">
+            <input type="hidden" name="day" value="{{ selected_day }}">
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
               <div>
-                <h3 style="margin: 0; font-size: 1.15rem;">Student Roster ({{ students.count }})</h3>
+                <h3 style="margin: 0; font-size: 1.15rem;">Student Roster ({{ students|length }})</h3>
                 <span style="font-size: 0.82rem; color: var(--text-secondary);">Day {{ selected_day }} Attendance Checklist</span>
               </div>
-              <div style="display: flex; gap: 0.4rem;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(true)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Select All</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(false)" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Clear All</button>
+              <div style="display: flex; gap: 0.45rem; align-items: center;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(true)" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">Select All</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="markAll(false)" style="padding: 0.35rem 0.65rem; font-size: 0.8rem;">Clear All</button>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; font-weight: 700; background: var(--accent); color: #000; border: none; cursor: pointer;">💾 Save Attendance</button>
               </div>
             </div>
 
@@ -166,7 +170,7 @@
             </div>
 
             <div style="margin-top: 1.25rem;">
-              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1rem;">
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem; font-size: 1rem; font-weight: 700; background: var(--accent); color: #000; border: none; cursor: pointer;">
                 💾 Save Roster Attendance
               </button>
             </div>
@@ -287,7 +291,7 @@
       showScanResult({
         success: false,
         status_type: 'camera_error',
-        message: "Unable to access camera. Browser does not support media devices."
+        message: "Unable to access camera. Browser does not support media devices or page is not served over a secure context (HTTPS/localhost)."
       });
       if (badge) {
         badge.textContent = "Camera Unavailable";
@@ -305,10 +309,14 @@
 
     function handleStreamSuccess(stream) {
       videoStream = stream;
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
+      if (!video) return;
 
-      // Request continuous hardware autofocus if supported by camera driver
+      video.srcObject = stream;
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("autoplay", "true");
+      video.muted = true;
+
+      // Request continuous hardware autofocus if supported by camera hardware
       try {
         const track = stream.getVideoTracks()[0];
         if (track && typeof track.getCapabilities === 'function') {
@@ -319,50 +327,78 @@
         }
       } catch(e) {}
 
-      video.play().then(() => {
-        isScanning = true;
-        if (badge) {
-          badge.textContent = "Scanning Live (60 FPS Instant Engine)";
-          badge.style.background = "#28a745";
-          badge.style.color = "#fff";
-        }
-        if (scanTimerId) cancelAnimationFrame(scanTimerId);
-        scanFrame();
-      }).catch(err => {
-        console.warn("Video playback exception:", err);
-      });
+      function playAndStartScanning() {
+        video.play().then(() => {
+          isScanning = true;
+          if (badge) {
+            badge.textContent = "Scanning Live (Instant 60 FPS)";
+            badge.style.background = "#28a745";
+            badge.style.color = "#fff";
+          }
+          if (scanTimerId) cancelAnimationFrame(scanTimerId);
+          scanFrame();
+        }).catch(err => {
+          console.warn("Video play exception:", err);
+          isScanning = true;
+          if (scanTimerId) cancelAnimationFrame(scanTimerId);
+          scanFrame();
+        });
+      }
+
+      // Wait for video metadata to be loaded so dimensions are positive and stream is rendering
+      video.onloadedmetadata = function() {
+        playAndStartScanning();
+      };
+
+      // Fallback if metadata was already loaded
+      if (video.readyState >= 1) {
+        playAndStartScanning();
+      }
     }
 
+    // Universal constraints: Ideal dimensions without strict minimums for 100% webcam/mobile compatibility
     const preferredConstraints = {
       video: {
-        width: { ideal: 1920, min: 1280 },
-        height: { ideal: 1080, min: 720 },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
         facingMode: { ideal: "environment" }
-      }
+      },
+      audio: false
     };
 
-    setTimeout(() => {
-      navigator.mediaDevices.getUserMedia(preferredConstraints)
-        .then(handleStreamSuccess)
-        .catch(function(err1) {
-          console.warn("Rear HD camera request failed, attempting fallback...", err1);
-          navigator.mediaDevices.getUserMedia({ video: true })
-            .then(handleStreamSuccess)
-            .catch(function(err2) {
-              console.error("Camera access error:", err2);
-              if (badge) {
-                badge.textContent = "Camera Error";
-                badge.style.background = "#ff5f56";
-                badge.style.color = "#fff";
-              }
-              showScanResult({
-                success: false,
-                status_type: 'camera_error',
-                message: "Unable to access camera. Please check camera permissions and ensure no other application is using the camera."
-              });
+    navigator.mediaDevices.getUserMedia(preferredConstraints)
+      .then(handleStreamSuccess)
+      .catch(function(err1) {
+        console.warn("Preferred camera request failed, trying generic video fallback...", err1);
+        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+          .then(handleStreamSuccess)
+          .catch(function(err2) {
+            console.error("Camera access error:", err2);
+            let errorMsg = "Unable to access camera.";
+            if (err2.name === 'NotAllowedError' || err2.name === 'PermissionDeniedError') {
+              errorMsg = "Camera permission was denied. Please allow camera access in your browser address bar.";
+            } else if (err2.name === 'NotReadableError' || err2.name === 'TrackStartError') {
+              errorMsg = "Camera is currently in use by another application (Zoom, Teams, Camera App). Please close other apps and try again.";
+            } else if (err2.name === 'NotFoundError' || err2.name === 'DevicesNotFoundError') {
+              errorMsg = "No camera hardware detected on this device.";
+            } else if (err2.name === 'OverconstrainedError') {
+              errorMsg = "Camera does not support the requested resolution.";
+            } else {
+              errorMsg = "Camera access error: " + (err2.message || err2.name);
+            }
+
+            if (badge) {
+              badge.textContent = "Camera Error";
+              badge.style.background = "#ff5f56";
+              badge.style.color = "#fff";
+            }
+            showScanResult({
+              success: false,
+              status_type: 'camera_error',
+              message: errorMsg
             });
-        });
-    }, 100);
+          });
+      });
   }
 
   async function scanFrame() {

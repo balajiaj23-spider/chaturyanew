@@ -1,65 +1,287 @@
 {% extends 'workshop/base.html' %}
 {% load static %}
 
-{% block title %}Registration Detail — {{ registration.full_name }}{% endblock %}
+{% block title %}Manage Student — {{ registration.full_name }} ({{ registration.registration_id }}){% endblock %}
 
 {% block content %}
-<section class="detail-section" style="padding-top: 3rem; padding-bottom: 5rem;">
+<section class="detail-section" style="padding-top: 2.5rem; padding-bottom: 5rem;">
   <div class="container">
     
+    <!-- Top Header -->
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
       <div>
-        <div class="badge" style="margin-bottom: 0.25rem;">Registration Details</div>
-        <h2>{{ registration.full_name }} ({{ registration.registration_id }})</h2>
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+          <span class="badge" style="background: var(--bg-secondary); border: 1px solid var(--border-subtle);">Student Record</span>
+          <span class="badge" style="background: var(--accent); color: #000; font-weight: 700;">{{ registration.registration_id }}</span>
+          <span class="badge" style="background: {% if registration.status == 'Accepted' %}#28a745; color: #fff;{% elif registration.status == 'Rejected' %}#dc3545; color: #fff;{% else %}#ffd43b; color: #000;{% endif %} font-weight: 700;">
+            {{ registration.status }}
+          </span>
+        </div>
+        <h2 style="margin: 0; font-size: 1.6rem;">{{ registration.full_name }}</h2>
+        <span style="font-size: 0.88rem; color: var(--text-secondary);">College ID: <strong>{{ registration.college_id }}</strong> &bull; Registered on {{ registration.registration_date|date:"M d, Y h:i A" }}</span>
       </div>
-      <div>
-        <a href="{% url 'admin_registrations_list' %}" class="btn btn-secondary btn-sm">← Back to Registrations List</a>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a href="{% url 'admin_registrations_list' %}" class="btn btn-secondary btn-sm">← Back to Registrations</a>
+        <a href="{% url 'admin_attendance' %}?course={{ registration.course|urlencode }}" class="btn btn-secondary btn-sm">📷 View Attendance</a>
       </div>
     </div>
 
-    <div class="detail-grid">
+    <!-- Messages / Alerts -->
+    {% if messages %}
+      <div style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+          <div class="badge" style="display: block; padding: 0.85rem 1.25rem; font-size: 0.95rem; margin-bottom: 0.5rem; text-align: left; {% if message.tags == 'error' %}background: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.4);{% else %}background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.4);{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="detail-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
+      
+      <!-- MAIN EDIT FORM -->
       <div class="detail-main">
-        <div class="detail-card">
-          <h3>Student Record Information</h3>
-          <table class="confirmation-table" style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-            <tbody>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration ID</th><td style="padding: 0.75rem; text-align: right;"><span class="badge">{{ registration.registration_id }}</span></td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Full Name</th><td style="padding: 0.75rem; text-align: right; font-weight: 600; color: var(--text-primary);">{{ registration.full_name }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">College ID</th><td style="padding: 0.75rem; text-align: right; font-weight: 600;">{{ registration.college_id }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Email Address</th><td style="padding: 0.75rem; text-align: right;">{{ registration.email }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Phone Number</th><td style="padding: 0.75rem; text-align: right;">{{ registration.phone }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Stream</th><td style="padding: 0.75rem; text-align: right;">{{ registration.stream }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Selected Workshop Course</th><td style="padding: 0.75rem; text-align: right; font-weight: 700; color: var(--accent);">{{ registration.course }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Year of Study</th><td style="padding: 0.75rem; text-align: right;">{{ registration.year_of_study }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Section</th><td style="padding: 0.75rem; text-align: right;">{{ registration.section }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Laptop Availability</th><td style="padding: 0.75rem; text-align: right;">{{ registration.has_laptop }}</td></tr>
-              <tr style="border-bottom: 1px solid var(--border-subtle);"><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration Status</th><td style="padding: 0.75rem; text-align: right;"><span class="badge" style="background: {% if registration.status == 'Accepted' %}var(--accent); color: #000;{% elif registration.status == 'Rejected' %}rgba(255, 95, 86, 0.2); color: #ff5f56; border: 1px solid rgba(255, 95, 86, 0.4);{% else %}rgba(255, 212, 59, 0.2); color: #ffd43b; border: 1px solid rgba(255, 212, 59, 0.4);{% endif %} font-weight: 600;">{{ registration.status }}</span></td></tr>
-              <tr><th style="padding: 0.75rem; text-align: left; color: var(--text-secondary);">Registration Submitted</th><td style="padding: 0.75rem; text-align: right; font-size: 0.9rem; color: var(--text-secondary);">{{ registration.registration_date }}</td></tr>
-            </tbody>
-          </table>
+        <div class="detail-card" style="padding: 1.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+            <h3 style="margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
+              ✏️ Edit All Student Details
+            </h3>
+            <span style="font-size: 0.8rem; color: var(--text-secondary);">All fields below are editable</span>
+          </div>
+
+          <form method="POST" id="studentEditForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+              <div style="background: rgba(220, 53, 69, 0.15); border: 1px solid rgba(220, 53, 69, 0.3); border-radius: var(--radius-sm); padding: 0.75rem; margin-bottom: 1.25rem; color: #ff6b6b; font-size: 0.9rem;">
+                {% for err in form.non_field_errors %}
+                  <div>⚠️ {{ err }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+
+            <!-- SECTION 1: IDENTITY & COURSE -->
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="font-size: 0.95rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem;">1. Identity &amp; Workshop Course</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.full_name.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    Student Full Name <span style="color: #dc3545;">*</span>
+                  </label>
+                  {{ form.full_name }}
+                  {% if form.full_name.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem; display: block; margin-top: 0.25rem;">{{ form.full_name.errors.0 }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.college_id.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    College ID / Register Number <span style="color: #dc3545;">*</span>
+                  </label>
+                  {{ form.college_id }}
+                  {% if form.college_id.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem; display: block; margin-top: 0.25rem;">{{ form.college_id.errors.0 }}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="{{ form.course.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem; color: var(--accent);">
+                  Workshop Course <span style="color: #dc3545;">*</span>
+                </label>
+                {{ form.course }}
+                {% if form.course.errors %}
+                  <span style="color: #ff6b6b; font-size: 0.8rem; display: block; margin-top: 0.25rem;">{{ form.course.errors.0 }}</span>
+                {% endif %}
+                <small style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.25rem; display: block;">
+                  Modifying this will transfer the student to the selected workshop roster.
+                </small>
+              </div>
+            </div>
+
+            <!-- SECTION 2: ACADEMIC DETAILS -->
+            <div style="margin-bottom: 1.5rem; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+              <h4 style="font-size: 0.95rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem;">2. Academic Details</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.stream.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">Stream</label>
+                  {{ form.stream }}
+                  {% if form.stream.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.stream.errors.0 }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.year_of_study.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">Year of Study</label>
+                  {{ form.year_of_study }}
+                  {% if form.year_of_study.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.year_of_study.errors.0 }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.section.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">Section</label>
+                  {{ form.section }}
+                  {% if form.section.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.section.errors.0 }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- SECTION 3: CONTACT & HARDWARE -->
+            <div style="margin-bottom: 1.5rem; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+              <h4 style="font-size: 0.95rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 1rem;">3. Contact &amp; Hardware Details</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.email.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    Email Address <span style="color: #dc3545;">*</span>
+                  </label>
+                  {{ form.email }}
+                  {% if form.email.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.email.errors.0 }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.phone.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    Phone Number
+                  </label>
+                  {{ form.phone }}
+                  {% if form.phone.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.phone.errors.0 }}</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.has_laptop.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    Laptop Availability
+                  </label>
+                  {{ form.has_laptop }}
+                  {% if form.has_laptop.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.has_laptop.errors.0 }}</span>
+                  {% endif %}
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label for="{{ form.status.id_for_label }}" style="font-weight: 600; font-size: 0.88rem; display: block; margin-bottom: 0.4rem;">
+                    Registration Status
+                  </label>
+                  {{ form.status }}
+                  {% if form.status.errors %}
+                    <span style="color: #ff6b6b; font-size: 0.8rem;">{{ form.status.errors.0 }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+              <button type="submit" class="btn btn-primary" style="padding: 0.85rem 1.75rem; font-size: 1rem; font-weight: 700; background: var(--accent); color: #000; border: none; cursor: pointer; flex: 1;">
+                💾 Save All Student Details
+              </button>
+              <a href="{% url 'admin_registrations_list' %}" class="btn btn-secondary" style="padding: 0.85rem 1.25rem;">
+                Cancel
+              </a>
+            </div>
+
+          </form>
         </div>
       </div>
 
-      <aside class="detail-sidebar">
-        <div class="sidebar-card">
-          <h3>Manage Status &amp; Record</h3>
+      <!-- SIDEBAR METRICS & QUICK ACTIONS (UNIFIED STATIC CONTAINER TO PREVENT OVERLAP SCROLLING) -->
+      <aside class="detail-sidebar" style="position: sticky; top: 90px; align-self: start;">
+        <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
           
-          <form method="POST">
-            {% csrf_token %}
+          <!-- Quick Summary Section -->
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+              <h3 style="margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 0.4rem;">
+                📋 Student Overview
+              </h3>
+              <span class="badge" style="font-size: 0.72rem; background: var(--bg-secondary);">{{ registration.registration_id }}</span>
+            </div>
             
-            <div class="form-group">
-              <label for="{{ form.status.id_for_label }}">Registration Status</label>
-              {{ form.status }}
+            <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <td style="padding: 0.45rem 0; color: var(--text-secondary);">Register No:</td>
+                  <td style="padding: 0.45rem 0; text-align: right; font-weight: 700; color: var(--accent);">{{ registration.college_id }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <td style="padding: 0.45rem 0; color: var(--text-secondary);">Course:</td>
+                  <td style="padding: 0.45rem 0; text-align: right; font-weight: 600; font-size: 0.82rem;">{{ registration.course }}</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <td style="padding: 0.45rem 0; color: var(--text-secondary);">Attendance:</td>
+                  <td style="padding: 0.45rem 0; text-align: right; font-weight: 700; color: #28a745;">{{ attendance_count }} / 15 Days</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border-subtle);">
+                  <td style="padding: 0.45rem 0; color: var(--text-secondary);">Status:</td>
+                  <td style="padding: 0.45rem 0; text-align: right;">
+                    <span class="badge" style="font-size: 0.72rem; background: {% if registration.status == 'Accepted' %}#28a745; color: #fff;{% elif registration.status == 'Rejected' %}#dc3545; color: #fff;{% else %}#ffd43b; color: #000;{% endif %} font-weight: 700;">
+                      {{ registration.status }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.45rem 0; color: var(--text-secondary);">Submitted:</td>
+                  <td style="padding: 0.45rem 0; text-align: right; font-size: 0.8rem; color: var(--text-secondary);">{{ registration.registration_date|date:"M d, Y" }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Quick Status Change Section -->
+          <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.35rem;">
+              ⚡ Quick Status Actions
             </div>
 
-            <div style="margin-top: 1rem;">
-              <button type="submit" class="btn btn-primary btn-block" style="padding: 0.9rem;">
-                Save Status Changes
-              </button>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              {% if registration.status != 'Accepted' %}
+                <form method="POST" action="{% url 'admin_update_status' reg_id=registration.registration_id %}" style="margin: 0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="status_action" value="accept">
+                  <button type="submit" class="btn btn-sm" style="width: 100%; background: #28a745; color: #fff; padding: 0.55rem; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.85rem;">
+                    ✓ Accept
+                  </button>
+                </form>
+              {% endif %}
+
+              {% if registration.status != 'Rejected' %}
+                <form method="POST" action="{% url 'admin_update_status' reg_id=registration.registration_id %}" style="margin: 0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="status_action" value="reject">
+                  <button type="submit" class="btn btn-sm" style="width: 100%; background: #dc3545; color: #fff; padding: 0.55rem; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; font-size: 0.85rem;">
+                    ✕ Reject
+                  </button>
+                </form>
+              {% endif %}
             </div>
-          </form>
+          </div>
+
+          <!-- Danger Zone Section -->
+          <div style="border-top: 1px solid rgba(220, 53, 69, 0.25); padding-top: 0.9rem; margin-top: 0.25rem;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #ff6b6b; margin-bottom: 0.4rem;">
+              🗑️ Delete Student
+            </div>
+            <form method="POST" action="{% url 'admin_delete_registration' reg_id=registration.registration_id %}" onsubmit="return confirm('Are you sure you want to permanently delete {{ registration.full_name|escapejs }} ({{ registration.registration_id }})? This action cannot be undone.');" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm" style="width: 100%; background: rgba(220, 53, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.35); padding: 0.45rem; font-size: 0.8rem; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer;">
+                Delete Student Record
+              </button>
+            </form>
+          </div>
+
         </div>
       </aside>
+
     </div>
 
   </div>

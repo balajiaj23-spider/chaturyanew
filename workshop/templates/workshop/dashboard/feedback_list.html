@@ -19,6 +19,17 @@
       </div>
     </div>
 
+    <!-- Messages / Alerts -->
+    {% if messages %}
+      <div style="margin-bottom: 1.5rem;">
+        {% for message in messages %}
+          <div class="badge" style="display: block; padding: 0.85rem 1.25rem; font-size: 0.95rem; margin-bottom: 0.5rem; text-align: left; {% if message.tags == 'error' or message.tags == 'warning' %}background: rgba(220, 53, 69, 0.2); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.4);{% else %}background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.4);{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     <!-- COURSE SEPARATION TABS -->
     <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border-subtle); max-width: 100%; box-sizing: border-box;">
       <a href="?course=" class="btn {% if not course_filter %}btn-primary{% else %}btn-secondary{% endif %}" style="border-bottom-left-radius: 0; border-bottom-right-radius: 0; padding: 0.75rem 1.25rem; font-weight: 700;">
@@ -91,6 +102,7 @@
               <th style="padding: 0.75rem; text-align: center;">Instructor</th>
               <th style="padding: 0.75rem; min-width: 250px;">Comments &amp; Feedback</th>
               <th style="padding: 0.75rem; min-width: 120px;">Submitted</th>
+              <th style="padding: 0.75rem; text-align: center; min-width: 90px;">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -119,10 +131,18 @@
                 <td style="padding: 0.75rem; font-size: 0.78rem; color: var(--text-secondary); white-space: nowrap;">
                   {{ item.created_at|date:"Y-m-d H:i" }}
                 </td>
+                <td style="padding: 0.75rem; text-align: center; white-space: nowrap;">
+                  <form method="POST" action="{% url 'admin_delete_feedback' feedback_id=item.id %}" style="display: inline-block; margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this feedback entry from {{ item.student_name|escapejs }} ({{ item.college_id }})? This action cannot be undone.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm" style="background: rgba(220, 53, 69, 0.15); color: #ff6b6b; border: 1px solid rgba(220, 53, 69, 0.35); padding: 0.35rem 0.65rem; font-size: 0.78rem; font-weight: 600; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;" title="Delete Feedback Entry">
+                      🗑️ Delete
+                    </button>
+                  </form>
+                </td>
               </tr>
             {% empty %}
               <tr>
-                <td colspan="8" style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
+                <td colspan="9" style="padding: 2.5rem; text-align: center; color: var(--text-secondary);">
                   No student feedback entries submitted yet{% if course_filter %} for {{ course_filter }}{% endif %}.
                 </td>
               </tr>
