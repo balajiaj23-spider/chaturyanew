@@ -84,12 +84,19 @@
           </div>
 
           <!-- Video Viewport Box -->
-          <div id="scannerContainer" style="position: relative; width: 100%; height: 280px; background: #000; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--border-subtle); display: flex; align-items: center; justify-content: center;">
-            <video id="scannerVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+          <div id="scannerContainer" style="position: relative; width: 100%; height: 280px; background: #111; border-radius: var(--radius-md); overflow: hidden; border: 2px solid var(--border-subtle); display: flex; align-items: center; justify-content: center;">
+            <video id="scannerVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; background: #000; display: block;"></video>
             <canvas id="scannerCanvas" style="display: none;"></canvas>
             
             <!-- Scanning Guide Reticle -->
-            <div id="scanReticle" style="position: absolute; width: 180px; height: 180px; border: 2px dashed var(--accent); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4); pointer-events: none;"></div>
+            <div id="scanReticle" style="position: absolute; width: 180px; height: 180px; border: 2px dashed var(--accent); border-radius: 12px; pointer-events: none; z-index: 2;"></div>
+            
+            <!-- Inactive Overlay Placeholder -->
+            <div id="cameraInactiveOverlay" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #181824; color: var(--text-secondary); text-align: center; padding: 1rem; z-index: 1;">
+              <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">📷</div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">Camera Ready</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary);">Click <strong>▶ Start Camera</strong> below to scan QR codes</div>
+            </div>
           </div>
 
           <!-- Camera Controls -->
@@ -279,15 +286,42 @@
       badge.style.background = "var(--bg-secondary)";
       badge.style.color = "var(--text-secondary)";
     }
+    const overlay = document.getElementById('cameraInactiveOverlay');
+    if (overlay) overlay.style.display = 'flex';
   }
 
-  function startCamera() {
-    stopCamera();
+  let isCameraStarting = false;
+
+  async function startCamera() {
+    if (isCameraStarting) return;
 
     const video = document.getElementById('scannerVideo');
     const badge = document.getElementById('cameraStatusBadge');
+    const overlay = document.getElementById('cameraInactiveOverlay');
+
+    // If stream is already active and live, resume playback without re-requesting hardware
+    if (videoStream && videoStream.active) {
+      const liveTrack = videoStream.getVideoTracks().find(t => t.readyState === 'live');
+      if (liveTrack) {
+        if (overlay) overlay.style.display = 'none';
+        if (video) video.play().catch(() => {});
+        isScanning = true;
+        if (badge) {
+          badge.textContent = "Scanning Live";
+          badge.style.background = "#28a745";
+          badge.style.color = "#fff";
+        }
+        if (scanTimerId) cancelAnimationFrame(scanTimerId);
+        scanFrame();
+        return;
+      }
+    }
+
+    isCameraStarting = true;
+    stopCamera();
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      isCameraStarting = false;
       showScanResult({
         success: false,
         status_type: 'camera_error',
@@ -302,21 +336,30 @@
     }
 
     if (badge) {
-      badge.textContent = "Requesting Camera...";
+      badge.textContent = "Starting Camera...";
       badge.style.background = "#ffc107";
       badge.style.color = "#000";
     }
 
+    // Brief delay to allow Windows MediaFoundation / DirectShow driver to fully release previous hardware lock
+    await new Promise(r => setTimeout(r, 200));
+
     function handleStreamSuccess(stream) {
       videoStream = stream;
-      if (!video) return;
+      if (!video) {
+        isCameraStarting = false;
+        return;
+      }
 
       video.srcObject = stream;
-      video.setAttribute("playsinline", "true");
-      video.setAttribute("autoplay", "true");
       video.muted = true;
+      video.playsInline = true;
+      video.setAttribute("playsinline", "true");
+      video.setAttribute("muted", "true");
 
-      // Request continuous hardware autofocus if supported by camera hardware
+      if (overlay) overlay.style.display = 'none';
+
+      // Request continuous hardware autofocus if supported by camera driver
       try {
         const track = stream.getVideoTracks()[0];
         if (track && typeof track.getCapabilities === 'function') {
@@ -327,78 +370,76 @@
         }
       } catch(e) {}
 
-      function playAndStartScanning() {
-        video.play().then(() => {
-          isScanning = true;
-          if (badge) {
-            badge.textContent = "Scanning Live (Instant 60 FPS)";
-            badge.style.background = "#28a745";
-            badge.style.color = "#fff";
-          }
-          if (scanTimerId) cancelAnimationFrame(scanTimerId);
-          scanFrame();
-        }).catch(err => {
-          console.warn("Video play exception:", err);
-          isScanning = true;
-          if (scanTimerId) cancelAnimationFrame(scanTimerId);
-          scanFrame();
-        });
+      let hasStarted = false;
+      function beginScanning() {
+        if (hasStarted) return;
+        hasStarted = true;
+        isCameraStarting = false;
+        isScanning = true;
+        if (badge) {
+          badge.textContent = "Scanning Live";
+          badge.style.background = "#28a745";
+          badge.style.color = "#fff";
+        }
+        if (scanTimerId) cancelAnimationFrame(scanTimerId);
+        scanFrame();
       }
 
-      // Wait for video metadata to be loaded so dimensions are positive and stream is rendering
+      video.onloadeddata = function() {
+        video.play().then(beginScanning).catch(beginScanning);
+      };
       video.onloadedmetadata = function() {
-        playAndStartScanning();
+        video.play().then(beginScanning).catch(beginScanning);
       };
 
-      // Fallback if metadata was already loaded
       if (video.readyState >= 1) {
-        playAndStartScanning();
+        video.play().then(beginScanning).catch(beginScanning);
       }
     }
 
-    // Universal constraints: Ideal dimensions without strict minimums for 100% webcam/mobile compatibility
-    const preferredConstraints = {
-      video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
-        facingMode: { ideal: "environment" }
-      },
-      audio: false
-    };
+    // On mobile devices attempt environment camera; on desktop use basic video constraint for 100% Windows driver compatibility
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
+    const primaryConstraints = isMobile 
+      ? { video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false }
+      : { video: true, audio: false };
 
-    navigator.mediaDevices.getUserMedia(preferredConstraints)
-      .then(handleStreamSuccess)
-      .catch(function(err1) {
-        console.warn("Preferred camera request failed, trying generic video fallback...", err1);
-        navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-          .then(handleStreamSuccess)
-          .catch(function(err2) {
-            console.error("Camera access error:", err2);
-            let errorMsg = "Unable to access camera.";
-            if (err2.name === 'NotAllowedError' || err2.name === 'PermissionDeniedError') {
-              errorMsg = "Camera permission was denied. Please allow camera access in your browser address bar.";
-            } else if (err2.name === 'NotReadableError' || err2.name === 'TrackStartError') {
-              errorMsg = "Camera is currently in use by another application (Zoom, Teams, Camera App). Please close other apps and try again.";
-            } else if (err2.name === 'NotFoundError' || err2.name === 'DevicesNotFoundError') {
-              errorMsg = "No camera hardware detected on this device.";
-            } else if (err2.name === 'OverconstrainedError') {
-              errorMsg = "Camera does not support the requested resolution.";
-            } else {
-              errorMsg = "Camera access error: " + (err2.message || err2.name);
-            }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(primaryConstraints);
+      handleStreamSuccess(stream);
+    } catch(err1) {
+      console.warn("Primary camera request failed, retrying simple video constraint...", err1);
+      
+      // Delay before fallback to allow Windows hardware lock to release
+      await new Promise(r => setTimeout(r, 300));
+      
+      try {
+        const stream2 = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        handleStreamSuccess(stream2);
+      } catch(err2) {
+        isCameraStarting = false;
+        console.error("Camera access error:", err2);
 
-            if (badge) {
-              badge.textContent = "Camera Error";
-              badge.style.background = "#ff5f56";
-              badge.style.color = "#fff";
-            }
-            showScanResult({
-              success: false,
-              status_type: 'camera_error',
-              message: errorMsg
-            });
-          });
-      });
+        let errorMsg = "Unable to access camera: " + (err2.message || err2.name);
+        if (err2.name === 'NotReadableError' || err2.name === 'TrackStartError' || (err2.message && err2.message.includes('Could not start video source'))) {
+          errorMsg = "Camera is currently in use by another application (Windows Camera, Zoom, Teams, or another browser tab). Please close other apps and click 'Start Camera' again.";
+        } else if (err2.name === 'NotAllowedError' || err2.name === 'PermissionDeniedError') {
+          errorMsg = "Camera permission was denied. Please click the camera icon in your browser address bar to allow access.";
+        } else if (err2.name === 'NotFoundError' || err2.name === 'DevicesNotFoundError') {
+          errorMsg = "No camera hardware detected on this device.";
+        }
+
+        if (badge) {
+          badge.textContent = "Camera Busy / Error";
+          badge.style.background = "#ff5f56";
+          badge.style.color = "#fff";
+        }
+        showScanResult({
+          success: false,
+          status_type: 'camera_error',
+          message: errorMsg
+        });
+      }
+    }
   }
 
   async function scanFrame() {
@@ -603,10 +644,8 @@
     checkboxes.forEach(c => c.checked = val);
   }
 
-  // Camera Auto-Start & Page Visibility Lifecycle management
+  // Event listeners for page interaction and cleanup
   document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(startCamera, 150);
-    
     const manualInput = document.getElementById("manualIdInput");
     if (manualInput) {
       manualInput.addEventListener("keypress", function(e) {
@@ -618,17 +657,9 @@
     }
   });
 
-  window.addEventListener("pageshow", function(e) {
-    if (e.persisted) {
-      setTimeout(startCamera, 150);
-    }
-  });
-
   document.addEventListener("visibilitychange", function() {
     if (document.hidden) {
       stopCamera();
-    } else {
-      setTimeout(startCamera, 150);
     }
   });
 

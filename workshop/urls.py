@@ -19,6 +19,7 @@ urlpatterns = [
     # Custom Admin Dashboard Routes
     path('custom-admin/', views.admin_dashboard_view, name='admin_dashboard'),
     path('custom-admin/registrations/', views.admin_registrations_list_view, name='admin_registrations_list'),
+    path('custom-admin/registrations/bulk-status/', views.admin_bulk_update_registration_status_view, name='admin_bulk_update_status'),
     path('custom-admin/registrations/export/', views.admin_export_registrations_csv, name='admin_registrations_export'),
     path('custom-admin/registrations/import/', views.admin_import_registrations_csv, name='admin_registrations_import'),
     path('custom-admin/registrations/<str:reg_id>/', views.admin_registration_detail_view, name='admin_registration_detail'),

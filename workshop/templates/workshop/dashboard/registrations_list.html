@@ -105,10 +105,41 @@
 
     <!-- Registrations Table (Original Layout) -->
     <div class="detail-card">
+      
+      <!-- Bulk Action Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-subtle);">
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllRegistrations(true)" style="padding: 0.4rem 0.8rem; font-size: 0.82rem;">☑ Select All</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="selectAllRegistrations(false)" style="padding: 0.4rem 0.8rem; font-size: 0.82rem;">☐ Clear All</button>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); margin-left: 0.25rem;">
+            Selected: <strong id="selectedCount" style="color: var(--accent);">0</strong> / {{ registrations.count }}
+          </span>
+        </div>
+
+        <form method="POST" action="{% url 'admin_bulk_update_status' %}" id="bulkActionForm" style="display: inline-flex; align-items: center; gap: 0.5rem; margin: 0; flex-wrap: wrap;">
+          {% csrf_token %}
+          <input type="hidden" name="q" value="{{ search_query }}">
+          <input type="hidden" name="course" value="{{ course_filter }}">
+          <input type="hidden" name="stream" value="{{ stream_filter }}">
+          <input type="hidden" name="year" value="{{ year_filter }}">
+          <input type="hidden" name="laptop" value="{{ laptop_filter }}">
+          <input type="hidden" name="status" value="{{ status_filter }}">
+          <button type="submit" name="status_action" value="accept" id="btnAcceptSelected" class="btn btn-sm" style="background: #28a745; color: #fff; font-weight: 700; padding: 0.45rem 0.9rem; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;" title="Accept all selected students">
+            ✓ Accept Selected
+          </button>
+          <button type="submit" name="status_action" value="accept_all" class="btn btn-sm" style="background: #198754; color: #fff; font-weight: 700; padding: 0.45rem 0.9rem; border: 1px solid rgba(255,255,255,0.25); border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;" onclick="return confirm('Are you sure you want to accept ALL {{ registrations.count }} currently listed students at once?');" title="Accept all currently listed students">
+            ✓ Accept All ({{ registrations.count }})
+          </button>
+        </form>
+      </div>
+
       <div style="width: 100%; max-width: 100%; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch;">
         <table class="confirmation-table" style="width: 100%; min-width: 1250px; border-collapse: collapse; margin: 0;">
           <thead>
             <tr style="border-bottom: 2px solid var(--border-subtle); text-align: left; font-size: 0.9rem; color: var(--text-secondary);">
+              <th style="padding: 0.75rem 0.5rem; width: 38px; text-align: center;">
+                <input type="checkbox" id="headerSelectAll" style="cursor: pointer; width: 16px; height: 16px;" title="Select / Deselect All">
+              </th>
               <th style="padding: 0.75rem; white-space: nowrap;">Reg ID</th>
               <th style="padding: 0.75rem; white-space: nowrap;">Student Name</th>
               <th style="padding: 0.75rem; white-space: nowrap;">College ID</th>
@@ -124,6 +155,9 @@
           <tbody>
             {% for reg in registrations %}
               <tr style="border-bottom: 1px solid var(--border-subtle); font-size: 0.9rem;">
+                <td style="padding: 0.75rem 0.5rem; text-align: center;">
+                  <input type="checkbox" name="selected_registrations" value="{{ reg.registration_id }}" form="bulkActionForm" class="reg-select-chk" style="cursor: pointer; width: 16px; height: 16px;">
+                </td>
                 <td style="padding: 0.75rem; white-space: nowrap;"><span class="badge">{{ reg.registration_id }}</span></td>
                 <td style="padding: 0.75rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">{{ reg.full_name }}</td>
                 <td style="padding: 0.75rem; white-space: nowrap;">{{ reg.college_id }}</td>
@@ -166,7 +200,7 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="10" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No registrations match your search filters.</td>
+                <td colspan="11" style="padding: 2rem; text-align: center; color: var(--text-secondary);">No registrations match your search filters.</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -193,7 +227,56 @@ function getCookie(name) {
   return cookieValue;
 }
 
+function selectAllRegistrations(checked) {
+  const checkboxes = document.querySelectorAll('.reg-select-chk');
+  checkboxes.forEach(function(chk) {
+    chk.checked = checked;
+  });
+  const headerChk = document.getElementById('headerSelectAll');
+  if (headerChk) headerChk.checked = checked;
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const checked = document.querySelectorAll('.reg-select-chk:checked');
+  const countEl = document.getElementById('selectedCount');
+  if (countEl) countEl.textContent = checked.length;
+  
+  const headerChk = document.getElementById('headerSelectAll');
+  const allChks = document.querySelectorAll('.reg-select-chk');
+  if (headerChk && allChks.length > 0) {
+    headerChk.checked = (checked.length === allChks.length);
+    headerChk.indeterminate = (checked.length > 0 && checked.length < allChks.length);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+  const headerChk = document.getElementById('headerSelectAll');
+  if (headerChk) {
+    headerChk.addEventListener('change', function() {
+      selectAllRegistrations(this.checked);
+    });
+  }
+
+  document.querySelectorAll('.reg-select-chk').forEach(function(chk) {
+    chk.addEventListener('change', updateSelectedCount);
+  });
+
+  const bulkForm = document.getElementById('bulkActionForm');
+  if (bulkForm) {
+    bulkForm.addEventListener('submit', function(e) {
+      const submitter = e.submitter;
+      if (submitter && submitter.value === 'accept') {
+        const checkedCount = document.querySelectorAll('.reg-select-chk:checked').length;
+        if (checkedCount === 0) {
+          e.preventDefault();
+          alert('Please select at least one student or click "Select All" first.');
+          return false;
+        }
+      }
+    });
+  }
+
   document.querySelectorAll('form[action*="/status/"]').forEach(function(form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();

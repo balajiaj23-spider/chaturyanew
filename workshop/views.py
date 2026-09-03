@@ -543,6 +543,67 @@ def admin_update_registration_status_view(request, reg_id):
 
 
 @user_passes_test(is_staff_user, login_url='admin_login')
+def admin_bulk_update_registration_status_view(request):
+    if request.method == 'POST':
+        status_action = request.POST.get('status_action', '').lower()
+        selected_ids = request.POST.getlist('selected_registrations')
+
+        if status_action == 'accept_all':
+            q = request.POST.get('q', '').strip()
+            course = request.POST.get('course', '').strip()
+            stream = request.POST.get('stream', '').strip()
+            year = request.POST.get('year', '').strip()
+            laptop = request.POST.get('laptop', '').strip()
+            status = request.POST.get('status', '').strip()
+
+            regs = Registration.objects.all()
+            if q:
+                regs = regs.filter(
+                    Q(full_name__icontains=q) |
+                    Q(college_id__icontains=q) |
+                    Q(registration_id__icontains=q) |
+                    Q(email__icontains=q)
+                )
+            if course:
+                regs = regs.filter(course=course)
+            if stream:
+                regs = regs.filter(stream=stream)
+            if year:
+                regs = regs.filter(year_of_study=year)
+            if laptop:
+                regs = regs.filter(has_laptop=laptop)
+            if status:
+                if status in ['Approved', 'Confirmed']:
+                    regs = regs.filter(status__in=['Accepted', 'Approved', 'Confirmed'])
+                elif status in ['Rejected', 'Cancelled']:
+                    regs = regs.filter(status__in=['Rejected', 'Cancelled'])
+                else:
+                    regs = regs.filter(status=status)
+
+            updated_count = regs.exclude(status='Accepted').update(status='Accepted')
+            messages.success(request, f"✓ Successfully accepted all {updated_count} student registration(s).")
+
+        elif status_action in ['accept', 'approve']:
+            if not selected_ids:
+                messages.warning(request, "No students selected. Please check student boxes or click 'Select All'.")
+            else:
+                updated_count = Registration.objects.filter(registration_id__in=selected_ids).update(status='Accepted')
+                messages.success(request, f"✓ Successfully accepted {updated_count} selected student registration(s).")
+
+        elif status_action in ['reject', 'cancel']:
+            if not selected_ids:
+                messages.warning(request, "No students selected.")
+            else:
+                updated_count = Registration.objects.filter(registration_id__in=selected_ids).update(status='Rejected')
+                messages.warning(request, f"Rejected {updated_count} selected student registration(s).")
+
+    referer = request.META.get('HTTP_REFERER', '')
+    if referer and '/custom-admin/' in referer and '/register/' not in referer:
+        return redirect(referer)
+    return redirect('admin_registrations_list')
+
+
+@user_passes_test(is_staff_user, login_url='admin_login')
 def admin_delete_registration_view(request, reg_id):
     if request.method == 'POST':
         registration = get_object_or_404(Registration, registration_id=reg_id)
